@@ -39,7 +39,8 @@ export function StudentProfileClient({ user }: StudentProfileClientProps) {
     return (
         <div className="max-w-5xl mx-auto pb-10">
             {/* Cover Image & Profile Header */}
-            <div className="relative mb-20">
+            {/* Cover Image & Profile Header */}
+            <div className="relative mb-16 md:mb-20">
                 <div className="h-48 md:h-64 w-full bg-primary/10 rounded-b-3xl border-b relative overflow-hidden">
                     <div className="absolute inset-0 bg-grid-black/5 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
 
@@ -52,31 +53,37 @@ export function StudentProfileClient({ user }: StudentProfileClientProps) {
                     </Link>
                 </div>
 
-                {/* Profile Card Overlay */}
+                {/* Avatar Overlay */}
                 <div className="absolute -bottom-16 left-0 right-0 px-6 flex justify-center md:justify-start md:px-10">
-                    <div className="flex flex-col md:flex-row items-center md:items-end gap-4 md:gap-6 w-full max-w-5xl">
-                        <div className="relative">
-                            <Avatar className="h-32 w-32 md:h-40 md:w-40 border-4 border-background shadow-xl">
-                                <AvatarImage src={user.profile_image_url || undefined} alt={user.full_name} />
-                                <AvatarFallback className="text-3xl bg-muted text-muted-foreground">
-                                    {getInitials(user.full_name)}
-                                </AvatarFallback>
-                            </Avatar>
-                            <div className={`absolute bottom-2 right-2 h-5 w-5 rounded-full border-2 border-background ${user.is_active ? 'bg-green-500' : 'bg-destructive'}`} />
-                        </div>
+                    <div className="relative">
+                        <Avatar className="h-32 w-32 md:h-40 md:w-40 border-4 border-background shadow-xl">
+                            <AvatarImage src={user.profile_image_url || undefined} alt={user.full_name} />
+                            <AvatarFallback className="text-3xl bg-muted text-muted-foreground">
+                                {getInitials(user.full_name)}
+                            </AvatarFallback>
+                        </Avatar>
+                        <div className={`absolute bottom-2 right-2 h-5 w-5 rounded-full border-2 border-background ${user.is_active ? 'bg-green-500' : 'bg-destructive'}`} />
+                    </div>
+                </div>
+            </div>
 
-                        <div className="flex-1 text-center md:text-left mb-2 md:mb-4">
-                            <h1 className="text-2xl md:text-3xl font-bold text-foreground">{user.full_name}</h1>
-                            <p className="text-muted-foreground font-medium">{user.course || 'Student'}</p>
-                            <div className="flex items-center justify-center md:justify-start gap-2 mt-2">
-                                <Badge variant="outline" className="px-3 py-1">
-                                    {user.student_id || 'No ID'}
-                                </Badge>
-                                <Badge>
-                                    Intern
-                                </Badge>
-                            </div>
-                        </div>
+            {/* Profile Info (Name, Course, Badges) - Now outside cover area */}
+            <div className="px-4 md:px-10 mt-4 mb-8 flex flex-col md:flex-row items-center md:items-start gap-4">
+                {/* Spacer for Desktop Avatar alignment */}
+                <div className="hidden md:block w-40 shrink-0" /> {/* Matches Avatar width */}
+
+                <div className="flex-1 text-center md:text-left space-y-2 md:pl-6">
+                    <div>
+                        <h1 className="text-2xl md:text-3xl font-bold text-foreground">{user.full_name}</h1>
+                        <p className="text-muted-foreground font-medium text-lg">{user.course || 'Student'}</p>
+                    </div>
+                    <div className="flex items-center justify-center md:justify-start gap-2">
+                        <Badge variant="outline" className="px-3 py-1">
+                            {user.student_id || 'No ID'}
+                        </Badge>
+                        <Badge>
+                            Intern
+                        </Badge>
                     </div>
                 </div>
             </div>
