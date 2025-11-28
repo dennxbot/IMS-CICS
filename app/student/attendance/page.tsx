@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { getStudentAttendanceHistory } from "@/lib/student";
+// Client component for attendance history with print functionality
 import { AttendanceHistoryClient } from "@/components/student/AttendanceHistoryClient";
 
 export default async function StudentAttendancePage() {
@@ -18,7 +19,7 @@ export default async function StudentAttendancePage() {
 
     return (
         <div className="container mx-auto p-6 space-y-6">
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 print:hidden">
                 <h1 className="text-3xl font-bold text-gray-900">Attendance History</h1>
                 <p className="text-gray-600">View and download your past attendance records.</p>
             </div>
