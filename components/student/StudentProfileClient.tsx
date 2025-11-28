@@ -46,8 +46,8 @@ export function StudentProfileClient({ user }: StudentProfileClientProps) {
                     {/* Back Button (Absolute) */}
                     <Link href="/student/dashboard" className="absolute top-6 left-6 z-10">
                         <Button variant="default" size="sm" className="shadow-sm">
-                            <ArrowLeft className="h-4 w-4 mr-2" />
-                            Dashboard
+                            <ArrowLeft className="h-4 w-4 md:mr-2" />
+                            <span className="hidden md:inline">Dashboard</span>
                         </Button>
                     </Link>
                 </div>
