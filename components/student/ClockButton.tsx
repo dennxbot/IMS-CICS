@@ -13,7 +13,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -85,7 +84,7 @@ export function ClockButton({
         await executeClockOut();
       }
       setIsDialogOpen(false);
-    } catch (error) {
+    } catch {
       // Error is handled in execute functions
     } finally {
       setIsLoading(false);
@@ -154,9 +153,10 @@ export function ClockButton({
         const errorData = await response.json();
         toast.error(errorData.error || 'Failed to clock in');
       }
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to clock in');
-      throw error; // Re-throw to keep dialog open if needed, but we handle it in handleConfirmAction
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to clock in';
+      toast.error(errorMessage);
+      throw error;
     }
   };
 

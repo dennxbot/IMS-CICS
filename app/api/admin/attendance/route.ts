@@ -55,10 +55,25 @@ export async function GET(request: NextRequest) {
     }
 
     // Transform data to consolidate sessions into single daily records
-    const consolidatedData: any[] = [];
-    const recordMap = new Map<string, any>();
+    interface AttendanceRecord {
+      student_id: string;
+      date: string;
+      session: number;
+      time_start: string | null;
+      time_end: string | null;
+      total_hours: number;
+      morning_late_minutes?: number;
+      afternoon_late_minutes?: number;
+      is_verified?: boolean;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      [key: string]: any; // Allow other fields from the join
+    }
+
+    const consolidatedData: AttendanceRecord[] = [];
+    const recordMap = new Map<string, AttendanceRecord>();
 
     if (data) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       data.forEach((record: any) => {
         const key = `${record.student_id}-${record.date}`;
 
@@ -91,25 +106,27 @@ export async function GET(request: NextRequest) {
           // Merge into existing record
           const existingRecord = recordMap.get(key);
 
-          if (record.session === 1) {
-            existingRecord.morning_check_in = record.time_start;
-            existingRecord.morning_check_out = record.time_end;
-            existingRecord.total_morning_hours = record.total_hours;
-            // Merge other fields if needed (e.g., lateness)
-            if (record.morning_late_minutes) existingRecord.morning_late_minutes = record.morning_late_minutes;
-          } else if (record.session === 2) {
-            existingRecord.afternoon_check_in = record.time_start;
-            existingRecord.afternoon_check_out = record.time_end;
-            existingRecord.total_afternoon_hours = record.total_hours;
-            // Merge other fields
-            if (record.afternoon_late_minutes) existingRecord.afternoon_late_minutes = record.afternoon_late_minutes;
+          if (existingRecord) {
+            if (record.session === 1) {
+              existingRecord.morning_check_in = record.time_start;
+              existingRecord.morning_check_out = record.time_end;
+              existingRecord.total_morning_hours = record.total_hours;
+              // Merge other fields if needed (e.g., lateness)
+              if (record.morning_late_minutes) existingRecord.morning_late_minutes = record.morning_late_minutes;
+            } else if (record.session === 2) {
+              existingRecord.afternoon_check_in = record.time_start;
+              existingRecord.afternoon_check_out = record.time_end;
+              existingRecord.total_afternoon_hours = record.total_hours;
+              // Merge other fields
+              if (record.afternoon_late_minutes) existingRecord.afternoon_late_minutes = record.afternoon_late_minutes;
+            }
+
+            // Update total hours
+            existingRecord.total_hours = (existingRecord.total_morning_hours || 0) + (existingRecord.total_afternoon_hours || 0);
+
+            // Prefer verified status if either is verified
+            if (record.is_verified) existingRecord.is_verified = true;
           }
-
-          // Update total hours
-          existingRecord.total_hours = (existingRecord.total_morning_hours || 0) + (existingRecord.total_afternoon_hours || 0);
-
-          // Prefer verified status if either is verified
-          if (record.is_verified) existingRecord.is_verified = true;
         }
       });
     }

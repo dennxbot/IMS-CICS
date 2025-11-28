@@ -301,6 +301,7 @@ export async function clockOut(studentId: string, session: 1 | 2, remarks?: stri
   // regardless of RLS policies that might be restrictive on updates
   const serviceSupabase = createServiceRoleClient();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateData: any = {
     time_end: now,
     timer_status: 0, // Stopped
