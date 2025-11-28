@@ -110,6 +110,12 @@ export interface SystemSettings {
   max_daily_hours: number;
   restrict_report_submission: boolean; // New field to enable/disable report submission restriction
   report_submission_days: string; // Comma-separated days when reports can be submitted (1=Monday, 7=Sunday)
+  morning_checkin_time: string; // Morning session check-in time (HH:MM format)
+  morning_checkout_time: string; // Morning session check-out time (HH:MM format)
+  morning_duration: number; // Morning session duration in hours
+  afternoon_checkin_time: string; // Afternoon session check-in time (HH:MM format)
+  afternoon_checkout_time: string; // Afternoon session check-out time (HH:MM format)
+  afternoon_duration: number; // Afternoon session duration in hours
   created_at: string;
   updated_at: string;
 }

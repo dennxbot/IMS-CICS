@@ -9,8 +9,13 @@ import { Progress } from "@/components/ui/progress"
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { format } from 'date-fns';
-import { Download, Users } from 'lucide-react';
-import { formatPhilippineTime12HourFromString } from '@/lib/timeUtils';
+import { Download, Users, Shield, ShieldAlert, ShieldCheck, MapPin, ExternalLink } from 'lucide-react';
+
+import {
+  calculateSessionHours,
+  getSessionStatus,
+  formatTime
+} from '@/lib/attendanceUtils';
 
 interface Company {
   id: number;
@@ -34,6 +39,19 @@ interface AttendanceRecord {
   is_verified: boolean;
   total_hours: number;
   remarks: string | null;
+  morning_check_in: string | null;
+  morning_check_out: string | null;
+  afternoon_check_in: string | null;
+  afternoon_check_out: string | null;
+  total_morning_hours: number;
+  total_afternoon_hours: number;
+  morning_late_minutes: number;
+  afternoon_late_minutes: number;
+  check_in_method: string;
+  location_verified: boolean;
+  location_latitude: number | null;
+  location_longitude: number | null;
+  anti_spoofing_score: number | null;
   users: {
     full_name: string;
     student_id: string;
@@ -99,7 +117,7 @@ export default function AdminAttendancePage() {
       setStudents([]);
       setAttendance([]);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCompany, dateRange]);
 
   const fetchCompanies = async () => {
@@ -120,16 +138,16 @@ export default function AdminAttendancePage() {
       console.log('Fetching students for company:', companyId);
       const response = await fetch(`/api/admin/attendance/companies/${companyId}`);
       console.log('Response status:', response.status);
-      
+
       if (!response.ok) {
         const errorText = await response.text();
         console.error('Error response:', errorText);
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const data = await response.json();
       console.log('Students data received:', data);
-      
+
       if (data.students) {
         setStudents(data.students);
       } else {
@@ -161,7 +179,7 @@ export default function AdminAttendancePage() {
       }
 
       const response = await fetch(`/api/admin/attendance/export?${params}`);
-      
+
       if (format === 'csv') {
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
@@ -189,16 +207,19 @@ export default function AdminAttendancePage() {
     }
   };
 
-  const getSessionLabel = (session: number) => {
-    return session === 1 ? 'Morning' : 'Afternoon';
-  };
 
-  const getStatusBadge = (isVerified: boolean) => {
-    return isVerified ? (
-      <Badge variant="default" className="bg-green-100 text-green-800">Present</Badge>
-    ) : (
-      <Badge variant="secondary" className="bg-red-100 text-red-800">Absent</Badge>
-    );
+
+  const getSessionBadge = (status: string) => {
+    switch (status) {
+      case 'complete':
+        return <Badge className="bg-green-100 text-green-800">Complete</Badge>;
+      case 'in-progress':
+        return <Badge className="bg-yellow-100 text-yellow-800">In Progress</Badge>;
+      case 'absent':
+        return <Badge className="bg-gray-100 text-gray-800">No Data</Badge>;
+      default:
+        return <Badge className="bg-red-100 text-red-800">Incomplete</Badge>;
+    }
   };
 
   return (
@@ -309,8 +330,8 @@ export default function AdminAttendancePage() {
                       <div className="flex items-center justify-between">
                         <h4 className="font-semibold">{student.full_name}</h4>
                         <div className="flex items-center space-x-2">
-                          <Progress 
-                            value={Math.min((student.timesheets?.[0]?.count || 0), 100)} 
+                          <Progress
+                            value={Math.min((student.timesheets?.[0]?.count || 0), 100)}
                             max={100}
                             color="primary"
                             className="w-16 h-1"
@@ -357,31 +378,124 @@ export default function AdminAttendancePage() {
                     <TableRow>
                       <TableHead>Date</TableHead>
                       <TableHead>Student Name</TableHead>
-                      <TableHead>Student ID</TableHead>
-                      <TableHead>Course</TableHead>
-                      <TableHead>Session</TableHead>
-                      <TableHead>Time In</TableHead>
-                      <TableHead>Time Out</TableHead>
-                      <TableHead>Total Hours</TableHead>
-                      <TableHead>Status</TableHead>
+                      <TableHead>Morning Session</TableHead>
+                      <TableHead>Afternoon Session</TableHead>
+                      <TableHead>Total</TableHead>
+                      <TableHead>Trust Score</TableHead>
+                      <TableHead>Location</TableHead>
                       <TableHead>Remarks</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {attendance.map((record) => (
-                      <TableRow key={record.id}>
-                        <TableCell>{format(new Date(record.date), 'MMM dd, yyyy')}</TableCell>
-                        <TableCell className="font-medium">{record.users.full_name}</TableCell>
-                        <TableCell>{record.users.student_id}</TableCell>
-                        <TableCell>{record.users.course}</TableCell>
-                        <TableCell>{getSessionLabel(record.session)}</TableCell>
-                        <TableCell>{formatPhilippineTime12HourFromString(record.time_start)}</TableCell>
-                        <TableCell>{formatPhilippineTime12HourFromString(record.time_end)}</TableCell>
-                        <TableCell>{record.total_hours || 0}</TableCell>
-                        <TableCell>{getStatusBadge(record.is_verified)}</TableCell>
-                        <TableCell>{record.remarks || '-'}</TableCell>
-                      </TableRow>
-                    ))}
+                    {attendance.map((record) => {
+                      const morningStatus = getSessionStatus(record.morning_check_in, record.morning_check_out);
+                      const afternoonStatus = getSessionStatus(record.afternoon_check_in, record.afternoon_check_out);
+                      const morningHours = calculateSessionHours(record.morning_check_in, record.morning_check_out);
+                      const afternoonHours = calculateSessionHours(record.afternoon_check_in, record.afternoon_check_out);
+
+                      // Determine Trust Score visuals
+                      const score = record.anti_spoofing_score || 100;
+                      let TrustIcon = ShieldCheck;
+                      let trustColor = "text-green-600";
+                      let trustBg = "bg-green-50";
+
+                      if (score < 80) {
+                        TrustIcon = ShieldAlert;
+                        trustColor = "text-red-600";
+                        trustBg = "bg-red-50";
+                      } else if (score < 95) {
+                        TrustIcon = Shield;
+                        trustColor = "text-yellow-600";
+                        trustBg = "bg-yellow-50";
+                      }
+
+                      return (
+                        <TableRow key={record.id}>
+                          <TableCell className="whitespace-nowrap">
+                            <div className="font-medium">{format(new Date(record.date), 'MMM dd')}</div>
+                            <div className="text-xs text-muted-foreground">{format(new Date(record.date), 'yyyy')}</div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="font-medium">{record.users.full_name}</div>
+                            <div className="text-xs text-muted-foreground">{record.users.student_id}</div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2">
+                                {getSessionBadge(morningStatus)}
+                              </div>
+                              {record.morning_check_in && (
+                                <div className="text-xs text-gray-500">
+                                  {formatTime(record.morning_check_in)} - {formatTime(record.morning_check_out)}
+                                </div>
+                              )}
+                              {record.morning_late_minutes > 0 && (
+                                <div className="text-xs text-red-500 font-medium">
+                                  +{record.morning_late_minutes}m late
+                                </div>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2">
+                                {getSessionBadge(afternoonStatus)}
+                              </div>
+                              {record.afternoon_check_in && (
+                                <div className="text-xs text-gray-500">
+                                  {formatTime(record.afternoon_check_in)} - {formatTime(record.afternoon_check_out)}
+                                </div>
+                              )}
+                              {record.afternoon_late_minutes > 0 && (
+                                <div className="text-xs text-red-500 font-medium">
+                                  +{record.afternoon_late_minutes}m late
+                                </div>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="font-bold">
+                              {(morningHours + afternoonHours).toFixed(1)}h
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className={`flex items-center gap-2 px-2 py-1 rounded-md w-fit ${trustBg}`}>
+                              <TrustIcon className={`h-4 w-4 ${trustColor}`} />
+                              <span className={`text-xs font-medium ${trustColor}`}>
+                                {score}%
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="space-y-1">
+                              <Badge variant="outline" className="text-xs">
+                                {record.check_in_method || 'manual'}
+                              </Badge>
+                              {record.location_latitude && record.location_longitude ? (
+                                <a
+                                  href={`https://www.google.com/maps?q=${record.location_latitude},${record.location_longitude}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 hover:underline mt-1"
+                                >
+                                  <MapPin className="h-3 w-3" />
+                                  View Map
+                                  <ExternalLink className="h-3 w-3" />
+                                </a>
+                              ) : (
+                                <div className="text-xs text-gray-400 flex items-center gap-1 mt-1">
+                                  <MapPin className="h-3 w-3" />
+                                  No Loc
+                                </div>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell className="max-w-[150px] truncate" title={record.remarks || ''}>
+                            {record.remarks || '-'}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </div>

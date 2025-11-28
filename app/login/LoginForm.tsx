@@ -183,13 +183,21 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import GoogleSignin from "./GoogleSignin";
+import { PasswordInput } from "@/components/ui/password-input";
 
 const formSchema = z.object({
   email: z.string().email(),
   password: passwordSchema,
 });
 
-export default function LoginForm() {
+import { SystemSettings } from "@/types/internship";
+import Image from "next/image";
+
+interface LoginFormProps {
+  systemSettings?: SystemSettings | null;
+}
+
+export default function LoginForm({ systemSettings }: LoginFormProps) {
   const [serverError, setServerError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false); // Add loading state
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -264,9 +272,26 @@ export default function LoginForm() {
   return (
     <main className="flex justify-center items-center min-h-screen px-4 py-8 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md mx-auto">
-        <CardHeader className="space-y-2 text-center">
-          <CardTitle className="text-2xl sm:text-3xl font-bold">Login</CardTitle>
-          <CardDescription className="text-sm sm:text-base">Login to your account</CardDescription>
+        <CardHeader className="space-y-4 text-center">
+          {systemSettings?.logo_url ? (
+            <div className="flex justify-center mb-4">
+              <Image
+                src={systemSettings.logo_url}
+                alt="System Logo"
+                width={80}
+                height={80}
+                priority
+              />
+            </div>
+          ) : null}
+          <div>
+            <CardTitle className="text-2xl sm:text-3xl font-bold">
+              {systemSettings?.name || 'Login'}
+            </CardTitle>
+            <CardDescription className="text-sm sm:text-base mt-2">
+              Login to your account
+            </CardDescription>
+          </div>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -294,7 +319,7 @@ export default function LoginForm() {
                   <FormItem className="space-y-2">
                     <FormLabel className="text-sm sm:text-base">Password</FormLabel>
                     <FormControl>
-                      <Input {...field} type="password" className="h-11 text-base" placeholder="Enter your password" />
+                      <PasswordInput {...field} className="h-11 text-base" placeholder="Enter your password" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

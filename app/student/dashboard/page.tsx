@@ -234,6 +234,8 @@ export default async function StudentDashboard() {
               timeStart={hasMorningSession?.time_start}
               timeEnd={hasMorningSession?.time_end}
               totalHours={hasMorningSession?.total_hours}
+              sessionStartTime={systemSettings?.morning_checkin_time || '07:45'}
+              sessionEndTime={systemSettings?.morning_checkout_time || '11:45'}
             />
             <ClockButton
               studentId={user.id}
@@ -243,6 +245,8 @@ export default async function StudentDashboard() {
               timeStart={hasAfternoonSession?.time_start}
               timeEnd={hasAfternoonSession?.time_end}
               totalHours={hasAfternoonSession?.total_hours}
+              sessionStartTime={systemSettings?.afternoon_checkin_time || '12:45'}
+              sessionEndTime={systemSettings?.afternoon_checkout_time || '16:45'}
             />
           </div>
         </CardContent>

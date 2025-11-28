@@ -27,6 +27,7 @@ import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { PasswordInput } from "@/components/ui/password-input";
 
 const formSchema = z.object({
   student_id: z.string().min(3, "Student ID must be at least 3 characters"),
@@ -244,7 +245,7 @@ export default function RegisterClient({ companies, courses }: RegisterClientPro
                   <FormItem className="space-y-1 sm:space-y-2">
                     <FormLabel className="text-sm sm:text-base font-medium">Password</FormLabel>
                     <FormControl>
-                      <Input {...field} type="password" className="h-11 text-base" placeholder="Enter your password" />
+                      <PasswordInput {...field} className="h-11 text-base" placeholder="Enter your password" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -258,7 +259,7 @@ export default function RegisterClient({ companies, courses }: RegisterClientPro
                   <FormItem className="space-y-1 sm:space-y-2">
                     <FormLabel className="text-sm sm:text-base font-medium">Confirm Password</FormLabel>
                     <FormControl>
-                      <Input {...field} type="password" className="h-11 text-base" placeholder="Confirm your password" />
+                      <PasswordInput {...field} className="h-11 text-base" placeholder="Confirm your password" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

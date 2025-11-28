@@ -35,7 +35,13 @@ export async function GET() {
       const settingsWithDefaults = {
         ...basicSettings,
         restrict_report_submission: false,
-        report_submission_days: '6'
+        report_submission_days: '6',
+        morning_checkin_time: '07:45',
+        morning_checkout_time: '11:45',
+        morning_duration: 4.0,
+        afternoon_checkin_time: '12:45',
+        afternoon_checkout_time: '16:45',
+        afternoon_duration: 4.0
       };
 
       return NextResponse.json({ settings: settingsWithDefaults });
@@ -48,7 +54,13 @@ export async function GET() {
       const settingsWithDefaults = {
         ...settings,
         restrict_report_submission: settings.restrict_report_submission ?? false,
-        report_submission_days: settings.report_submission_days ?? '6'
+        report_submission_days: settings.report_submission_days ?? '6',
+        morning_checkin_time: settings.morning_checkin_time ?? '07:45',
+        morning_checkout_time: settings.morning_checkout_time ?? '11:45',
+        morning_duration: settings.morning_duration ?? 4.0,
+        afternoon_checkin_time: settings.afternoon_checkin_time ?? '12:45',
+        afternoon_checkout_time: settings.afternoon_checkout_time ?? '16:45',
+        afternoon_duration: settings.afternoon_duration ?? 4.0
       };
       return NextResponse.json({ settings: settingsWithDefaults });
     }
@@ -104,7 +116,13 @@ export async function PUT(request: NextRequest) {
       email_notifications,
       attendance_verification_required,
       min_weekly_hours,
-      max_daily_hours
+      max_daily_hours,
+      morning_checkin_time,
+      morning_checkout_time,
+      morning_duration,
+      afternoon_checkin_time,
+      afternoon_checkout_time,
+      afternoon_duration
     } = body;
 
     // Validate report submission days if provided
@@ -135,6 +153,12 @@ export async function PUT(request: NextRequest) {
     if (max_daily_hours !== undefined) updatePayload.max_daily_hours = max_daily_hours;
     if (restrict_report_submission !== undefined) updatePayload.restrict_report_submission = restrict_report_submission;
     if (report_submission_days !== undefined) updatePayload.report_submission_days = report_submission_days;
+    if (morning_checkin_time !== undefined) updatePayload.morning_checkin_time = morning_checkin_time;
+    if (morning_checkout_time !== undefined) updatePayload.morning_checkout_time = morning_checkout_time;
+    if (morning_duration !== undefined) updatePayload.morning_duration = morning_duration;
+    if (afternoon_checkin_time !== undefined) updatePayload.afternoon_checkin_time = afternoon_checkin_time;
+    if (afternoon_checkout_time !== undefined) updatePayload.afternoon_checkout_time = afternoon_checkout_time;
+    if (afternoon_duration !== undefined) updatePayload.afternoon_duration = afternoon_duration;
 
     // Update the system settings (there should only be one record)
     const { data: settings, error } = await supabase

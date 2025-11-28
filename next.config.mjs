@@ -5,7 +5,7 @@ const nextConfig = {
   
   // Optimize images for production
   images: {
-    domains: ['localhost'],
+    domains: ['localhost', 'csu.edu.ph'],
     formats: ['image/webp', 'image/avif'],
   },
   

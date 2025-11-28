@@ -1,6 +1,29 @@
 import { createClient } from "@/utils/supabase/server";
+import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { redirect } from "next/navigation";
 import LoginForm from "./LoginForm";
+import { SystemSettings } from "@/types/internship";
+
+async function getSystemSettings(): Promise<SystemSettings | null> {
+  try {
+    const supabase = createServiceRoleClient();
+    
+    const { data: settings, error } = await supabase
+      .from('system_settings')
+      .select('*')
+      .single();
+
+    if (error) {
+      console.warn('Failed to load system settings:', error);
+      return null;
+    }
+
+    return settings;
+  } catch (error) {
+    console.warn('Error fetching system settings:', error);
+    return null;
+  }
+}
 
 export default async function LoginPage() {
   const supabase = createClient();
@@ -11,7 +34,8 @@ export default async function LoginPage() {
     if (error) {
       // If there's an auth error, don't redirect, just show login form
       console.log("Auth error in login page:", error);
-      return <LoginForm />;
+      const systemSettings = await getSystemSettings();
+      return <LoginForm systemSettings={systemSettings} />;
     }
     
     if (data.user) {
@@ -43,8 +67,10 @@ export default async function LoginPage() {
   } catch (error) {
     console.log("Error checking auth state:", error);
     // If there's any error, just show the login form
-    return <LoginForm />;
+    const systemSettings = await getSystemSettings();
+    return <LoginForm systemSettings={systemSettings} />;
   }
 
-  return <LoginForm />;
+  const systemSettings = await getSystemSettings();
+  return <LoginForm systemSettings={systemSettings} />;
 }

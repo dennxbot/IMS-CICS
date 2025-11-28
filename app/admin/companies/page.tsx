@@ -65,7 +65,7 @@ export default async function AdminCompanies() {
           <p className="text-sm sm:text-base text-gray-600 mt-1">Manage company information and geofencing settings</p>
         </div>
         <Link href="/admin/companies/new">
-          <Button className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto">
+          <Button className="w-full sm:w-auto">
             <Plus className="w-4 h-4 mr-2" />
             Add New Company
           </Button>

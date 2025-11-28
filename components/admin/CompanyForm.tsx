@@ -420,7 +420,7 @@ export default function CompanyForm({ company }: CompanyFormProps) {
         <Button
           type="submit"
           disabled={isLoading}
-          className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 order-1 sm:order-2"
+          className="w-full sm:w-auto order-1 sm:order-2"
         >
           {isLoading ? (
             <>

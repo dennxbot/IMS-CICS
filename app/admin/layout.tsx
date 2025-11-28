@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard,
@@ -18,6 +19,7 @@ import {
   ChevronDown,
   Calendar,
 } from "lucide-react";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,6 +31,7 @@ import {
 
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
+import { SystemSettings } from "@/types/internship";
 
 interface User {
   id: string;
@@ -43,6 +46,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const [user, setUser] = useState<User | null>(null);
+  const [systemSettings, setSystemSettings] = useState<SystemSettings | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
@@ -103,6 +107,17 @@ export default function AdminLayout({
           email: data.user.email || '', // ensure email is always a string
           full_name: userData.full_name,
         });
+
+        // Fetch system settings
+        try {
+          const settingsResponse = await fetch('/api/admin/system-settings');
+          if (settingsResponse.ok) {
+            const settingsData = await settingsResponse.json();
+            setSystemSettings(settingsData.settings);
+          }
+        } catch (settingsError) {
+          console.warn('Failed to fetch system settings:', settingsError);
+        }
       } catch (error) {
         console.error('Error in fetchUser:', error);
         setAuthError(error instanceof Error ? error.message : 'Authentication failed. Please try logging in again.');
@@ -188,9 +203,28 @@ export default function AdminLayout({
         lg:translate-x-0 lg:static lg:inset-0
       `}>
         <div className="flex items-center justify-between p-6">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-800">Admin Panel</h2>
-            <p className="text-sm text-gray-600 mt-1">{user.full_name}</p>
+          <div className="flex items-center">
+            {systemSettings?.logo_url ? (
+              <div className="flex items-center">
+                <Image
+                  src={systemSettings.logo_url}
+                  alt="System Logo"
+                  width={40}
+                  height={40}
+                  className="mr-3"
+                  priority
+                />
+                <div>
+                  <h2 className="text-lg font-bold text-gray-800">{systemSettings.name || 'Admin Panel'}</h2>
+                  <p className="text-sm text-gray-600">{user.full_name}</p>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800">{systemSettings?.name || 'Admin Panel'}</h2>
+                <p className="text-sm text-gray-600 mt-1">{user.full_name}</p>
+              </div>
+            )}
           </div>
           <Button
             variant="ghost"
@@ -287,7 +321,18 @@ export default function AdminLayout({
             >
               <Menu className="w-5 h-5" />
             </Button>
-            <h1 className="ml-4 text-lg font-semibold text-gray-800">Admin Panel</h1>
+            {systemSettings?.logo_url ? (
+              <Image
+                src={systemSettings.logo_url}
+                alt="System Logo"
+                width={32}
+                height={32}
+                className="ml-4"
+                priority
+              />
+            ) : (
+              <h1 className="ml-4 text-lg font-semibold text-gray-800">{systemSettings?.name || 'Admin Panel'}</h1>
+            )}
           </div>
           
           {/* Profile Dropdown for Mobile */}

@@ -5,7 +5,7 @@ import { clockOut } from "@/lib/student";
 export async function POST(request: NextRequest) {
   try {
     const user = await getCurrentUser();
-    
+
     if (!user || user.user_type !== 2) {
       return NextResponse.json(
         { error: "Unauthorized" },
@@ -15,6 +15,7 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const session = body.session as 1 | 2;
+    const remarks = body.remarks;
 
     if (!session || (session !== 1 && session !== 2)) {
       return NextResponse.json(
@@ -23,7 +24,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const result = await clockOut(user.id, session);
+    const result = await clockOut(user.id, session, remarks);
 
     return NextResponse.json({
       success: true,

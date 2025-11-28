@@ -9,8 +9,105 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { toast } from 'sonner';
 
+// Function to immediately update theme colors without reload
+const updateThemeImmediately = (primaryColor: string, secondaryColor: string) => {
+  // Update primary color
+  if (primaryColor) {
+    const primaryHsl = hexToHsl(primaryColor);
+    document.documentElement.style.setProperty('--primary-hue', primaryHsl.h.toString());
+    document.documentElement.style.setProperty('--primary-saturation', `${primaryHsl.s}%`);
+    document.documentElement.style.setProperty('--primary-lightness', `${primaryHsl.l}%`);
+    
+    const primaryForeground = primaryHsl.l > 50 ? '10%' : '98%';
+    document.documentElement.style.setProperty('--primary-foreground-lightness', primaryForeground);
+  }
+  
+  // Update secondary color
+  if (secondaryColor) {
+    const secondaryHsl = hexToHsl(secondaryColor);
+    document.documentElement.style.setProperty('--secondary-hue', secondaryHsl.h.toString());
+    document.documentElement.style.setProperty('--secondary-saturation', `${secondaryHsl.s}%`);
+    document.documentElement.style.setProperty('--secondary-lightness', `${secondaryHsl.l}%`);
+    
+    const secondaryForeground = secondaryHsl.l > 50 ? '10%' : '98%';
+    document.documentElement.style.setProperty('--secondary-foreground-lightness', secondaryForeground);
+  }
+  
+  // Force browser to recalculate styles
+    document.documentElement.style.display = 'none';
+    void document.documentElement.offsetHeight; // Force reflow
+    document.documentElement.style.display = '';
+};
+
+interface HSL {
+  h: number;
+  s: number;
+  l: number;
+}
+
+function hexToHsl(hex: string): HSL {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  if (!result) return { h: 222.2, s: 47.4, l: 11.2 };
+  
+  const r = parseInt(result[1], 16) / 255;
+  const g = parseInt(result[2], 16) / 255;
+  const b = parseInt(result[3], 16) / 255;
+  
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const diff = max - min;
+  
+  let hue = 0;
+  if (diff !== 0) {
+    if (max === r) {
+      hue = ((g - b) / diff) % 6;
+    } else if (max === g) {
+      hue = (b - r) / diff + 2;
+    } else {
+      hue = (r - g) / diff + 4;
+    }
+  }
+  
+  hue = Math.round(hue * 60);
+  if (hue < 0) hue += 360;
+  
+  const lightness = (max + min) / 2;
+  
+  if (diff === 0) return { h: hue, s: 0, l: lightness * 100 };
+  
+  const saturation = diff / (1 - Math.abs(2 * lightness - 1));
+  
+  return {
+    h: hue,
+    s: saturation * 100,
+    l: lightness * 100
+  };
+}
+
 
 const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+// Helper function to calculate duration between two times (HH:MM format)
+function calculateDuration(startTime: string, endTime: string): number {
+  const [startHours, startMinutes] = startTime.split(':').map(Number);
+  const [endHours, endMinutes] = endTime.split(':').map(Number);
+  
+  // Convert to total minutes
+  const startTotalMinutes = startHours * 60 + startMinutes;
+  const endTotalMinutes = endHours * 60 + endMinutes;
+  
+  // Calculate duration in minutes
+  let durationMinutes = endTotalMinutes - startTotalMinutes;
+  
+  // Handle cases where end time is on the next day (e.g., 23:00 to 01:00)
+  if (durationMinutes < 0) {
+    durationMinutes += 24 * 60; // Add 24 hours
+  }
+  
+  // Convert to hours with 0.5 hour precision
+  const durationHours = durationMinutes / 60;
+  return Math.round(durationHours * 2) / 2; // Round to nearest 0.5
+}
 
 export default function AdminSettings() {
   const [isLoading, setIsLoading] = useState(true);
@@ -27,6 +124,14 @@ export default function AdminSettings() {
   const [attendanceVerificationRequired, setAttendanceVerificationRequired] = useState(true);
   const [restrictReportSubmission, setRestrictReportSubmission] = useState(false);
   const [reportSubmissionDays, setReportSubmissionDays] = useState<string[]>(['6']); // Default to Saturday
+  
+  // Session time configuration
+  const [morningCheckinTime, setMorningCheckinTime] = useState('07:45');
+  const [morningCheckoutTime, setMorningCheckoutTime] = useState('11:45');
+  const [morningDuration, setMorningDuration] = useState(4.0);
+  const [afternoonCheckinTime, setAfternoonCheckinTime] = useState('12:45');
+  const [afternoonCheckoutTime, setAfternoonCheckoutTime] = useState('16:45');
+  const [afternoonDuration, setAfternoonDuration] = useState(4.0);
 
   useEffect(() => {
     loadSettings();
@@ -54,6 +159,14 @@ export default function AdminSettings() {
       setAttendanceVerificationRequired(systemSettings.attendance_verification_required || true);
       setRestrictReportSubmission(systemSettings.restrict_report_submission || false);
       setReportSubmissionDays(systemSettings.report_submission_days ? systemSettings.report_submission_days.split(',') : ['6']);
+      
+      // Load session time settings
+      setMorningCheckinTime(systemSettings.morning_checkin_time || '07:45');
+      setMorningCheckoutTime(systemSettings.morning_checkout_time || '11:45');
+      setMorningDuration(systemSettings.morning_duration || 4.0);
+      setAfternoonCheckinTime(systemSettings.afternoon_checkin_time || '12:45');
+      setAfternoonCheckoutTime(systemSettings.afternoon_checkout_time || '16:45');
+      setAfternoonDuration(systemSettings.afternoon_duration || 4.0);
     } catch (error) {
       console.error('Error loading settings:', error);
       toast.error('Failed to load system settings');
@@ -76,7 +189,13 @@ export default function AdminSettings() {
         email_notifications: emailNotifications,
         attendance_verification_required: attendanceVerificationRequired,
         restrict_report_submission: restrictReportSubmission,
-        report_submission_days: reportSubmissionDays.join(',')
+        report_submission_days: reportSubmissionDays.join(','),
+        morning_checkin_time: morningCheckinTime,
+        morning_checkout_time: morningCheckoutTime,
+        morning_duration: morningDuration,
+        afternoon_checkin_time: afternoonCheckinTime,
+        afternoon_checkout_time: afternoonCheckoutTime,
+        afternoon_duration: afternoonDuration
       };
       
       const response = await fetch('/api/admin/system-settings', {
@@ -94,6 +213,17 @@ export default function AdminSettings() {
       
       await response.json();
       toast.success('Settings saved successfully!');
+      
+      // Reload settings from server to ensure UI reflects latest changes
+      await loadSettings();
+      
+      // Immediately update theme colors without page reload
+      updateThemeImmediately(primaryColor, secondaryColor);
+      
+      // Dispatch event for any theme updater components
+      window.dispatchEvent(new CustomEvent('theme-update', {
+        detail: { primaryColor, secondaryColor }
+      }));
     } catch (error) {
       console.error('Error saving settings:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to save settings');
@@ -178,6 +308,14 @@ export default function AdminSettings() {
                 onChange={(e) => setSecondaryColor(e.target.value)}
               />
             </div>
+
+            <div className="space-y-2">
+              <Label>Theme Preview</Label>
+              <div className="flex gap-2">
+                <Button className="flex-1">Primary Button</Button>
+                <Button variant="secondary" className="flex-1">Secondary Button</Button>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
@@ -260,6 +398,120 @@ export default function AdminSettings() {
                 onChange={(e) => setMaxDailyHours(parseFloat(e.target.value) || 0)}
                 placeholder="Enter maximum daily hours"
               />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Session Time Configuration</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                <span className="mr-2">🌅</span> Morning Session
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="morningCheckinTime">Check-in Time</Label>
+                  <Input
+                    id="morningCheckinTime"
+                    type="time"
+                    value={morningCheckinTime}
+                    onChange={(e) => {
+                      const newCheckinTime = e.target.value;
+                      setMorningCheckinTime(newCheckinTime);
+                      // Auto-calculate duration
+                      const newDuration = calculateDuration(newCheckinTime, morningCheckoutTime);
+                      setMorningDuration(newDuration);
+                    }}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="morningCheckoutTime">Check-out Time</Label>
+                  <Input
+                    id="morningCheckoutTime"
+                    type="time"
+                    value={morningCheckoutTime}
+                    onChange={(e) => {
+                      const newCheckoutTime = e.target.value;
+                      setMorningCheckoutTime(newCheckoutTime);
+                      // Auto-calculate duration
+                      const newDuration = calculateDuration(morningCheckinTime, newCheckoutTime);
+                      setMorningDuration(newDuration);
+                    }}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="morningDuration">Duration (hours)</Label>
+                  <Input
+                    id="morningDuration"
+                    type="number"
+                    step="0.5"
+                    min="0"
+                    max="8"
+                    value={morningDuration}
+                    readOnly
+                    className="bg-gray-50"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                <span className="mr-2">🌞</span> Afternoon Session
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="afternoonCheckinTime">Check-in Time</Label>
+                  <Input
+                    id="afternoonCheckinTime"
+                    type="time"
+                    value={afternoonCheckinTime}
+                    onChange={(e) => {
+                      const newCheckinTime = e.target.value;
+                      setAfternoonCheckinTime(newCheckinTime);
+                      // Auto-calculate duration
+                      const newDuration = calculateDuration(newCheckinTime, afternoonCheckoutTime);
+                      setAfternoonDuration(newDuration);
+                    }}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="afternoonCheckoutTime">Check-out Time</Label>
+                  <Input
+                    id="afternoonCheckoutTime"
+                    type="time"
+                    value={afternoonCheckoutTime}
+                    onChange={(e) => {
+                      const newCheckoutTime = e.target.value;
+                      setAfternoonCheckoutTime(newCheckoutTime);
+                      // Auto-calculate duration
+                      const newDuration = calculateDuration(afternoonCheckinTime, newCheckoutTime);
+                      setAfternoonDuration(newDuration);
+                    }}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="afternoonDuration">Duration (hours)</Label>
+                  <Input
+                    id="afternoonDuration"
+                    type="number"
+                    step="0.5"
+                    min="0"
+                    max="8"
+                    value={afternoonDuration}
+                    readOnly
+                    className="bg-gray-50"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="text-sm text-gray-500 bg-blue-50 p-3 rounded-lg">
+              <p className="font-medium">Session Configuration:</p>
+              <p>These settings define the official clock-in and clock-out times for student attendance. Students can only check in/out during the configured session times.</p>
             </div>
           </CardContent>
         </Card>

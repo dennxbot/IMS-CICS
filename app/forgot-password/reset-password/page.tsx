@@ -16,7 +16,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useState, useEffect, Suspense } from "react";
 import { useForm } from "react-hook-form";
@@ -26,6 +25,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { PasswordInput } from "@/components/ui/password-input";
 
 const formSchema = z.object({
     password: z.string().min(6, "Password must be at least 6 characters"),
@@ -203,7 +203,7 @@ function ResetPasswordContent() {
                   <FormItem className="space-y-2">
                     <FormLabel className="text-sm sm:text-base">New password</FormLabel>
                     <FormControl>
-                      <Input {...field} type="password" className="h-11 text-base" placeholder="Enter new password" />
+                      <PasswordInput {...field} className="h-11 text-base" placeholder="Enter new password" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -216,7 +216,7 @@ function ResetPasswordContent() {
                   <FormItem className="space-y-2">
                     <FormLabel className="text-sm sm:text-base">Confirm password</FormLabel>
                     <FormControl>
-                      <Input {...field} type="password" className="h-11 text-base" placeholder="Confirm new password" />
+                      <PasswordInput {...field} className="h-11 text-base" placeholder="Confirm new password" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
