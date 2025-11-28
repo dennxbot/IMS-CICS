@@ -38,7 +38,7 @@ export function StudentProfileClient({ user }: StudentProfileClientProps) {
             {/* Back Button */}
             <div className="mb-4">
                 <Link href="/student/dashboard">
-                    <Button variant="ghost" size="sm">
+                    <Button variant="outline" size="sm">
                         <ArrowLeft className="h-4 w-4 mr-2" />
                         Back to Dashboard
                     </Button>
@@ -48,7 +48,7 @@ export function StudentProfileClient({ user }: StudentProfileClientProps) {
             {/* Profile Header */}
             <Card>
                 <CardContent className="p-6">
-                    <div className="flex flex-col items-start gap-6 md:flex-row md:items-center">
+                    <div className="flex flex-col items-center text-center gap-6 md:flex-row md:items-start md:text-left md:items-center">
                         <div className="relative">
                             <Avatar className="h-24 w-24">
                                 <AvatarImage src={user.profile_image_url || undefined} alt={user.full_name} />
@@ -67,10 +67,10 @@ export function StudentProfileClient({ user }: StudentProfileClientProps) {
                             <div className="flex flex-col gap-2 md:flex-row md:items-center">
                                 <h1 className="text-2xl font-bold">{user.full_name}</h1>
                                 <Badge variant="secondary">Intern</Badge>
-                                {user.is_active && <Badge className="bg-green-500 hover:bg-green-600">Active</Badge>}
+                                {user.is_active && <Badge variant="default">Active</Badge>}
                             </div>
                             <p className="text-muted-foreground">{user.course || 'Student'}</p>
-                            <div className="text-muted-foreground flex flex-wrap gap-4 text-sm">
+                            <div className="text-muted-foreground flex flex-wrap justify-center md:justify-start gap-4 text-sm">
                                 <div className="flex items-center gap-1">
                                     <EnvelopeClosedIcon className="size-4" />
                                     {user.email}
@@ -93,7 +93,7 @@ export function StudentProfileClient({ user }: StudentProfileClientProps) {
 
             {/* Profile Content */}
             <Tabs defaultValue="personal" className="space-y-6">
-                <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
+                <TabsList className="grid w-full grid-cols-2 h-auto md:grid-cols-4 md:h-10">
                     <TabsTrigger value="personal">Personal</TabsTrigger>
                     <TabsTrigger value="account">Account</TabsTrigger>
                     <TabsTrigger value="security">Security</TabsTrigger>
@@ -160,7 +160,7 @@ export function StudentProfileClient({ user }: StudentProfileClientProps) {
                                     <Label className="text-base">Account Status</Label>
                                     <p className="text-muted-foreground text-sm">Your account is currently {user.is_active ? 'active' : 'inactive'}</p>
                                 </div>
-                                <Badge variant="outline" className={user.is_active ? "border-green-200 bg-green-50 text-green-700" : "border-red-200 bg-red-50 text-red-700"}>
+                                <Badge variant={user.is_active ? "default" : "destructive"}>
                                     {user.is_active ? 'Active' : 'Inactive'}
                                 </Badge>
                             </div>
