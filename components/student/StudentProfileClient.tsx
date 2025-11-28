@@ -45,7 +45,7 @@ export function StudentProfileClient({ user }: StudentProfileClientProps) {
 
                     {/* Back Button (Absolute) */}
                     <Link href="/student/dashboard" className="absolute top-6 left-6 z-10">
-                        <Button variant="secondary" size="sm" className="bg-background/80 hover:bg-background/90 backdrop-blur-sm">
+                        <Button variant="default" size="sm" className="shadow-sm">
                             <ArrowLeft className="h-4 w-4 mr-2" />
                             Dashboard
                         </Button>
@@ -84,9 +84,19 @@ export function StudentProfileClient({ user }: StudentProfileClientProps) {
             {/* Main Content */}
             <div className="px-4 md:px-10 mt-24 md:mt-16">
                 <Tabs defaultValue="overview" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2 md:w-[400px] mb-8">
-                        <TabsTrigger value="overview">Overview</TabsTrigger>
-                        <TabsTrigger value="details">Full Details</TabsTrigger>
+                    <TabsList className="grid w-full grid-cols-2 md:w-[400px] mb-8 bg-muted/50 p-1">
+                        <TabsTrigger
+                            value="overview"
+                            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                        >
+                            Overview
+                        </TabsTrigger>
+                        <TabsTrigger
+                            value="details"
+                            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                        >
+                            Full Details
+                        </TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="overview" className="space-y-6">
