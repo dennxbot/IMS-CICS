@@ -17,7 +17,7 @@ import { SystemSettings, isReportSubmissionAllowed } from "@/types/internship";
 async function getSystemSettings(): Promise<SystemSettings | null> {
   try {
     const supabase = createServiceRoleClient();
-    
+
     const { data: settings, error } = await supabase
       .from('system_settings')
       .select('*')
@@ -37,7 +37,7 @@ async function getSystemSettings(): Promise<SystemSettings | null> {
 
 export default async function StudentDashboard() {
   const user = await getCurrentUser();
-  
+
   if (!user) {
     redirect('/login');
   }
@@ -76,7 +76,7 @@ export default async function StudentDashboard() {
       .select('total_required_hours, working_days, daily_hours_limit, max_weekly_hours')
       .eq('id', user.company_id)
       .single();
-    
+
     if (companyData) {
       companySettings = {
         total_required_hours: companyData.total_required_hours || 500,
@@ -105,44 +105,44 @@ export default async function StudentDashboard() {
     if (!systemSettings || !systemSettings.restrict_report_submission) {
       return null;
     }
-    
+
     const allowedDays = systemSettings.report_submission_days.split(',').map(day => parseInt(day.trim()));
     const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     const allowedDayNames = allowedDays.map(day => dayNames[day]).join(', ');
-    
+
     // Get current date/time in Manila timezone
     const manilaTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila' });
     const currentDate = new Date(manilaTime);
     const currentDayName = dayNames[currentDate.getDay()];
-    const currentTime = currentDate.toLocaleTimeString('en-US', { 
-      hour: '2-digit', 
+    const currentTime = currentDate.toLocaleTimeString('en-US', {
+      hour: '2-digit',
       minute: '2-digit',
-      hour12: true 
+      hour12: true
     });
-    
+
     // Find next available submission date
     let nextSubmissionDate = null;
     let daysToAdd = 1;
-    
+
     while (!nextSubmissionDate && daysToAdd <= 14) { // Look ahead up to 2 weeks
       const futureDate = new Date(currentDate);
       futureDate.setDate(currentDate.getDate() + daysToAdd);
       const futureDay = futureDate.getDay();
-      
+
       if (allowedDays.includes(futureDay)) {
         nextSubmissionDate = futureDate;
       }
       daysToAdd++;
     }
-    
+
     let message = `Report submission is restricted to: ${allowedDayNames}`;
     message += `\n\nCurrent date and time: ${currentDayName}, ${currentDate.toLocaleDateString()} ${currentTime}`;
-    
+
     if (nextSubmissionDate) {
       const nextDayName = dayNames[nextSubmissionDate.getDay()];
       message += `\n\nNext submission available: ${nextDayName}, ${nextSubmissionDate.toLocaleDateString()}`;
     }
-    
+
     return message;
   };
 
@@ -157,6 +157,9 @@ export default async function StudentDashboard() {
         <div className="flex flex-wrap gap-2">
           <Link href="/student/profile">
             <Button variant="outline" size="sm" className="h-10 text-sm">Profile</Button>
+          </Link>
+          <Link href="/student/attendance">
+            <Button variant="outline" size="sm" className="h-10 text-sm">My Attendance</Button>
           </Link>
           <Link href="/student/reports">
             <Button variant="outline" size="sm" className="h-10 text-sm">My Reports</Button>
@@ -300,11 +303,11 @@ export default async function StudentDashboard() {
                       {report.total_hours_worked} hours • Submitted {formatPhilippineDateDisplay(new Date(report.submitted_at))}
                     </p>
                   </div>
-                  <Badge 
+                  <Badge
                     variant={
-                      report.status === 'approved' ? 'default' : 
-                      report.status === 'rejected' ? 'destructive' : 
-                      'secondary'
+                      report.status === 'approved' ? 'default' :
+                        report.status === 'rejected' ? 'destructive' :
+                          'secondary'
                     }
                     className="self-start sm:self-center text-xs sm:text-sm"
                   >

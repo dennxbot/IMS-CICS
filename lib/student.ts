@@ -397,6 +397,24 @@ export async function submitWeeklyReport(studentId: string, report: {
   return data as WeeklyReport;
 }
 
+// Get student attendance history
+export async function getStudentAttendanceHistory(studentId: string): Promise<Timesheet[]> {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from('timesheets')
+    .select('*')
+    .eq('student_id', studentId)
+    .order('date', { ascending: false })
+    .order('session', { ascending: true });
+
+  if (error || !data) {
+    return [];
+  }
+
+  return data as Timesheet[];
+}
+
 // Helper function to validate session time is appropriate for the session
 async function validateSessionTime(session: 1 | 2): Promise<{ valid: boolean; message?: string }> {
   const philippineTime = getPhilippineTime();
