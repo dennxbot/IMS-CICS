@@ -2,36 +2,16 @@
 
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
-import Link from "next/link";
-import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import {
-  LayoutDashboard,
-  Users,
-  Building,
-  GraduationCap,
-  FileText,
-  Settings,
-  LogOut,
-  Menu,
-  X,
-  User,
-  ChevronDown,
-  Calendar,
-} from "lucide-react";
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-
-import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
+import { createClient } from "@/utils/supabase/client";
 import { SystemSettings } from "@/types/internship";
+import { AppSidebar } from "@/components/app-sidebar";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
+import { Separator } from "@/components/ui/separator";
 
 interface User {
   id: string;
@@ -48,7 +28,6 @@ export default function AdminLayout({
   const [user, setUser] = useState<User | null>(null);
   const [systemSettings, setSystemSettings] = useState<SystemSettings | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const pathname = usePathname();
   const router = useRouter();
@@ -58,7 +37,7 @@ export default function AdminLayout({
       try {
         const supabase = createClient();
         const { data, error } = await supabase.auth.getUser();
-        
+
         if (error || !data?.user) {
           console.log('No authenticated user found, redirecting to login');
           router.push('/login');
@@ -131,23 +110,16 @@ export default function AdminLayout({
     fetchUser();
   }, [router]);
 
-  // Close sidebar when route changes (mobile)
-  useEffect(() => {
-    setSidebarOpen(false);
-  }, [pathname]);
-
-  // Close sidebar when clicking outside (mobile)
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as Element;
-      if (sidebarOpen && !target.closest('.sidebar') && !target.closest('.sidebar-toggle')) {
-        setSidebarOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [sidebarOpen]);
+  const getPageTitle = (path: string) => {
+    if (path.includes('/admin/dashboard')) return 'Dashboard';
+    if (path.includes('/admin/students')) return 'Students';
+    if (path.includes('/admin/companies')) return 'Companies';
+    if (path.includes('/admin/courses')) return 'Courses';
+    if (path.includes('/admin/attendance')) return 'Attendance';
+    if (path.includes('/admin/reports')) return 'Reports';
+    if (path.includes('/admin/settings')) return 'Settings';
+    return 'Admin Panel';
+  };
 
   if (isLoading) {
     return (
@@ -190,194 +162,20 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="flex h-screen bg-gray-100 relative">
-      {/* Mobile overlay */}
-      {sidebarOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden" />
-      )}
-
-      {/* Sidebar */}
-      <div className={`
-        sidebar fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-        lg:translate-x-0 lg:static lg:inset-0
-      `}>
-        <div className="flex items-center justify-between p-6">
-          <div className="flex items-center">
-            {systemSettings?.logo_url ? (
-              <div className="flex items-center">
-                <Image
-                  src={systemSettings.logo_url}
-                  alt="System Logo"
-                  width={40}
-                  height={40}
-                  className="mr-3"
-                  priority
-                />
-                <div>
-                  <h2 className="text-lg font-bold text-gray-800">{systemSettings.name || 'Admin Panel'}</h2>
-                  <p className="text-sm text-gray-600">{user.full_name}</p>
-                </div>
-              </div>
-            ) : (
-              <div>
-                <h2 className="text-2xl font-bold text-gray-800">{systemSettings?.name || 'Admin Panel'}</h2>
-                <p className="text-sm text-gray-600 mt-1">{user.full_name}</p>
-              </div>
-            )}
+    <SidebarProvider>
+      <AppSidebar user={user} systemSettings={systemSettings} />
+      <SidebarInset>
+        <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
+          <div className="flex items-center gap-2 px-4">
+            <SidebarTrigger className="-ml-1" />
+            <Separator orientation="vertical" className="mr-2 h-4" />
+            <span className="font-semibold">{getPageTitle(pathname)}</span>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setSidebarOpen(false)}
-            className="lg:hidden sidebar-toggle"
-          >
-            <X className="w-5 h-5" />
-          </Button>
+        </header>
+        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+          {children}
         </div>
-        
-        <nav className="mt-6">
-          <Link
-            href="/admin/dashboard"
-            className="flex items-center px-6 py-3 text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
-          >
-            <LayoutDashboard className="w-5 h-5 mr-3" />
-            Dashboard
-          </Link>
-          
-          <Link
-            href="/admin/students"
-            className="flex items-center px-6 py-3 text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
-          >
-            <Users className="w-5 h-5 mr-3" />
-            Students
-          </Link>
-          
-          <Link
-            href="/admin/companies"
-            className="flex items-center px-6 py-3 text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
-          >
-            <Building className="w-5 h-5 mr-3" />
-            Companies
-          </Link>
-          
-          <Link
-            href="/admin/courses"
-            className="flex items-center px-6 py-3 text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
-          >
-            <GraduationCap className="w-5 h-5 mr-3" />
-            Courses
-          </Link>
-          
-          <Link
-            href="/admin/attendance"
-            className="flex items-center px-6 py-3 text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
-          >
-            <Calendar className="w-5 h-5 mr-3" />
-            Attendance
-          </Link>
-          
-          <Link
-            href="/admin/reports"
-            className="flex items-center px-6 py-3 text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
-          >
-            <FileText className="w-5 h-5 mr-3" />
-            Reports
-          </Link>
-          
-          <Link
-            href="/admin/settings"
-            className="flex items-center px-6 py-3 text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
-          >
-            <Settings className="w-5 h-5 mr-3" />
-            Settings
-          </Link>
-          
-          <div className="border-t mt-6 pt-6">
-            <form action="/logout" method="post">
-              <Button
-                variant="ghost"
-                className="w-full justify-start text-gray-700 hover:text-gray-900"
-                type="submit"
-              >
-                <LogOut className="w-5 h-5 mr-3" />
-                Logout
-              </Button>
-            </form>
-          </div>
-        </nav>
-      </div>
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Mobile Header */}
-        <div className="lg:hidden bg-white shadow-sm px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setSidebarOpen(true)}
-              className="sidebar-toggle"
-            >
-              <Menu className="w-5 h-5" />
-            </Button>
-            {systemSettings?.logo_url ? (
-              <Image
-                src={systemSettings.logo_url}
-                alt="System Logo"
-                width={32}
-                height={32}
-                className="ml-4"
-                priority
-              />
-            ) : (
-              <h1 className="ml-4 text-lg font-semibold text-gray-800">{systemSettings?.name || 'Admin Panel'}</h1>
-            )}
-          </div>
-          
-          {/* Profile Dropdown for Mobile */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <User className="w-5 h-5" />
-                <ChevronDown className="w-4 h-4 ml-1" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link href="/admin/profile" className="cursor-pointer">
-                  <User className="w-4 h-4 mr-2" />
-                  Profile
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/admin/settings" className="cursor-pointer">
-                  <Settings className="w-4 h-4 mr-2" />
-                  Settings
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <form action="/logout" method="post" className="w-full">
-                  <button type="submit" className="flex items-center w-full text-left cursor-pointer">
-                    <LogOut className="w-4 h-4 mr-2" />
-                    Logout
-                  </button>
-                </form>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-
-        {/* Main Content Area */}
-        <div className="flex-1 overflow-auto">
-          <div className="p-4 lg:p-8">
-            {children}
-          </div>
-        </div>
-      </div>
-    </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }
