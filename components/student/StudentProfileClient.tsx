@@ -96,13 +96,13 @@ export function StudentProfileClient({ user }: StudentProfileClientProps) {
                 <TabsList className="grid w-full grid-cols-2 h-auto md:grid-cols-4 md:h-10">
                     <TabsTrigger value="personal">Personal</TabsTrigger>
                     <TabsTrigger value="account">Account</TabsTrigger>
-                    <TabsTrigger value="security" className="gap-2">
+                    <TabsTrigger value="security" className="relative overflow-visible">
                         Security
-                        <Badge variant="secondary" className="text-[10px] h-5 px-1.5">Coming Soon</Badge>
+                        <Badge variant="secondary" className="absolute -top-2 -right-3 text-[9px] h-4 px-1 shadow-sm border-white/50">Soon</Badge>
                     </TabsTrigger>
-                    <TabsTrigger value="notifications" className="gap-2">
+                    <TabsTrigger value="notifications" className="relative overflow-visible">
                         Notifications
-                        <Badge variant="secondary" className="text-[10px] h-5 px-1.5">Coming Soon</Badge>
+                        <Badge variant="secondary" className="absolute -top-2 -right-3 text-[9px] h-4 px-1 shadow-sm border-white/50">Soon</Badge>
                     </TabsTrigger>
                 </TabsList>
 
