@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+
 interface StudentProfileClientProps {
     user: User;
 }
@@ -39,7 +40,6 @@ export function StudentProfileClient({ user }: StudentProfileClientProps) {
     return (
         <div className="max-w-5xl mx-auto pb-10">
             {/* Cover Image & Profile Header */}
-            {/* Cover Image & Profile Header */}
             <div className="relative mb-16 md:mb-20">
                 <div className="h-48 md:h-64 w-full bg-primary/10 rounded-b-3xl border-b relative overflow-hidden">
                     <div className="absolute inset-0 bg-grid-black/5 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
@@ -51,6 +51,11 @@ export function StudentProfileClient({ user }: StudentProfileClientProps) {
                             <span className="hidden md:inline">Dashboard</span>
                         </Button>
                     </Link>
+
+                    {/* Name in Cover Page */}
+                    <div className="absolute bottom-20 md:bottom-6 left-0 right-0 md:left-56 md:text-left text-center px-4">
+                        <h1 className="text-3xl md:text-5xl font-bold text-primary tracking-tight drop-shadow-sm">{user.full_name}</h1>
+                    </div>
                 </div>
 
                 {/* Avatar Overlay */}
@@ -67,14 +72,13 @@ export function StudentProfileClient({ user }: StudentProfileClientProps) {
                 </div>
             </div>
 
-            {/* Profile Info (Name, Course, Badges) - Now outside cover area */}
+            {/* Profile Info (Course, Badges) - Below Cover */}
             <div className="px-4 md:px-10 mt-20 md:mt-4 mb-8 flex flex-col md:flex-row items-center md:items-start gap-4">
                 {/* Spacer for Desktop Avatar alignment */}
                 <div className="hidden md:block w-40 shrink-0" /> {/* Matches Avatar width */}
 
                 <div className="flex-1 text-center md:text-left space-y-2 md:pl-6">
                     <div>
-                        <h1 className="text-2xl md:text-3xl font-bold text-foreground">{user.full_name}</h1>
                         <p className="text-muted-foreground font-medium text-lg">{user.course || 'Student'}</p>
                     </div>
                     <div className="flex items-center justify-center md:justify-start gap-2">
@@ -175,8 +179,6 @@ export function StudentProfileClient({ user }: StudentProfileClientProps) {
                                                 <p className="text-sm font-medium line-clamp-2" title={user.course || ''}>{user.course || 'N/A'}</p>
                                             </div>
                                         </div>
-
-
                                     </div>
                                 </CardContent>
                             </Card>
@@ -246,8 +248,6 @@ export function StudentProfileClient({ user }: StudentProfileClientProps) {
 
                                             <span className="text-muted-foreground">Course</span>
                                             <span className="col-span-2 font-medium">{user.course || 'N/A'}</span>
-
-
                                         </div>
                                     </div>
                                 </div>
