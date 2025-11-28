@@ -1,33 +1,25 @@
 'use client';
 
-import { useState } from 'react';
 import { User } from '@/types/internship';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-    Mail, Phone, GraduationCap,
-    ArrowLeft, Copy, Check, Building, Clock
-} from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Camera, MapPin, Key, ArrowLeft } from "lucide-react";
+import { CalendarIcon, EnvelopeClosedIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
-import { toast } from "sonner";
 
 interface StudentProfileClientProps {
     user: User;
 }
 
 export function StudentProfileClient({ user }: StudentProfileClientProps) {
-    const [copiedField, setCopiedField] = useState<string | null>(null);
-
-    const copyToClipboard = (text: string, field: string) => {
-        navigator.clipboard.writeText(text);
-        setCopiedField(field);
-        toast.success(`${field} copied to clipboard`);
-        setTimeout(() => setCopiedField(null), 2000);
-    };
-
     const getInitials = (name: string) => {
         return name
             .split(' ')
@@ -37,232 +29,197 @@ export function StudentProfileClient({ user }: StudentProfileClientProps) {
             .slice(0, 2);
     };
 
+    const fullName = user.full_name || '';
+    const [firstName, ...lastNameParts] = fullName.split(' ');
+    const lastName = lastNameParts.join(' ');
+
     return (
-        <div className="max-w-5xl mx-auto pb-10">
-            {/* Cover Image & Profile Header */}
-            <div className="relative mb-16 md:mb-20">
-                <div className="h-48 md:h-64 w-full bg-primary/10 rounded-b-3xl border-b relative overflow-hidden">
-                    <div className="absolute inset-0 bg-grid-black/5 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
-
-                    {/* Back Button (Absolute) */}
-                    <Link href="/student/dashboard" className="absolute top-6 left-6 z-10">
-                        <Button variant="default" size="sm" className="shadow-sm">
-                            <ArrowLeft className="h-4 w-4 md:mr-2" />
-                            <span className="hidden md:inline">Dashboard</span>
-                        </Button>
-                    </Link>
-
-                    {/* Name in Cover Page */}
-                    <div className="absolute bottom-20 md:bottom-6 left-0 right-0 md:left-56 md:text-left text-center px-4">
-                        <h1 className="text-3xl md:text-5xl font-bold text-primary tracking-tight drop-shadow-sm">{user.full_name}</h1>
-                    </div>
-                </div>
-
-                {/* Avatar Overlay */}
-                <div className="absolute -bottom-16 left-0 right-0 px-6 flex justify-center md:justify-start md:px-10">
-                    <div className="relative">
-                        <Avatar className="h-32 w-32 md:h-40 md:w-40 border-4 border-background shadow-xl">
-                            <AvatarImage src={user.profile_image_url || undefined} alt={user.full_name} />
-                            <AvatarFallback className="text-3xl bg-muted text-muted-foreground">
-                                {getInitials(user.full_name)}
-                            </AvatarFallback>
-                        </Avatar>
-                        <div className={`absolute bottom-2 right-2 h-5 w-5 rounded-full border-2 border-background ${user.is_active ? 'bg-green-500' : 'bg-destructive'}`} />
-                    </div>
-                </div>
+        <div className="container mx-auto space-y-6 px-4 py-10 max-w-5xl">
+            {/* Back Button */}
+            <div className="mb-4">
+                <Link href="/student/dashboard">
+                    <Button variant="ghost" size="sm">
+                        <ArrowLeft className="h-4 w-4 mr-2" />
+                        Back to Dashboard
+                    </Button>
+                </Link>
             </div>
 
-            {/* Profile Info (Course, Badges) - Below Cover */}
-            <div className="px-4 md:px-10 mt-20 md:mt-4 mb-8 flex flex-col md:flex-row items-center md:items-start gap-4">
-                {/* Spacer for Desktop Avatar alignment */}
-                <div className="hidden md:block w-40 shrink-0" /> {/* Matches Avatar width */}
-
-                <div className="flex-1 text-center md:text-left space-y-2 md:pl-6">
-                    <div>
-                        <p className="text-muted-foreground font-medium text-lg">{user.course || 'Student'}</p>
-                    </div>
-                    <div className="flex items-center justify-center md:justify-start gap-2">
-                        <Badge variant="outline" className="px-3 py-1">
-                            {user.student_id || 'No ID'}
-                        </Badge>
-                        <Badge>
-                            Intern
-                        </Badge>
-                    </div>
-                </div>
-            </div>
-
-            {/* Main Content */}
-            <div className="px-4 md:px-10 mt-24 md:mt-16">
-                <Tabs defaultValue="overview" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2 md:w-[400px] mb-8 bg-muted/50 p-1">
-                        <TabsTrigger
-                            value="overview"
-                            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                        >
-                            Overview
-                        </TabsTrigger>
-                        <TabsTrigger
-                            value="details"
-                            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                        >
-                            Full Details
-                        </TabsTrigger>
-                    </TabsList>
-
-                    <TabsContent value="overview" className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            {/* Quick Info Cards */}
-                            <Card className="hover:shadow-md transition-shadow">
-                                <CardHeader className="pb-2">
-                                    <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Contact</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="space-y-4">
-                                        <div className="flex items-center justify-between group">
-                                            <div className="flex items-center gap-3 overflow-hidden">
-                                                <div className="p-2 bg-primary/10 rounded-full text-primary">
-                                                    <Mail className="h-4 w-4" />
-                                                </div>
-                                                <div className="truncate">
-                                                    <p className="text-xs text-muted-foreground">Email</p>
-                                                    <p className="text-sm font-medium truncate" title={user.email}>{user.email}</p>
-                                                </div>
-                                            </div>
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-                                                onClick={() => copyToClipboard(user.email, 'Email')}
-                                            >
-                                                {copiedField === 'Email' ? <Check className="h-3 w-3 text-primary" /> : <Copy className="h-3 w-3 text-muted-foreground" />}
-                                            </Button>
-                                        </div>
-
-                                        <div className="flex items-center justify-between group">
-                                            <div className="flex items-center gap-3">
-                                                <div className="p-2 bg-primary/10 rounded-full text-primary">
-                                                    <Phone className="h-4 w-4" />
-                                                </div>
-                                                <div>
-                                                    <p className="text-xs text-muted-foreground">Phone</p>
-                                                    <p className="text-sm font-medium">{user.contact_number || 'N/A'}</p>
-                                                </div>
-                                            </div>
-                                            {user.contact_number && (
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-                                                    onClick={() => copyToClipboard(user.contact_number!, 'Phone')}
-                                                >
-                                                    {copiedField === 'Phone' ? <Check className="h-3 w-3 text-primary" /> : <Copy className="h-3 w-3 text-muted-foreground" />}
-                                                </Button>
-                                            )}
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            <Card className="hover:shadow-md transition-shadow">
-                                <CardHeader className="pb-2">
-                                    <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Academic</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="space-y-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="p-2 bg-primary/10 rounded-full text-primary">
-                                                <GraduationCap className="h-4 w-4" />
-                                            </div>
-                                            <div>
-                                                <p className="text-xs text-muted-foreground">Course</p>
-                                                <p className="text-sm font-medium line-clamp-2" title={user.course || ''}>{user.course || 'N/A'}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            <Card className="hover:shadow-md transition-shadow md:col-span-1">
-                                <CardHeader className="pb-2">
-                                    <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Internship</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="space-y-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="p-2 bg-primary/10 rounded-full text-primary">
-                                                <Building className="h-4 w-4" />
-                                            </div>
-                                            <div>
-                                                <p className="text-xs text-muted-foreground">Company</p>
-                                                <p className="text-sm font-medium">Assigned Company</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-center gap-3">
-                                            <div className="p-2 bg-primary/10 rounded-full text-primary">
-                                                <Clock className="h-4 w-4" />
-                                            </div>
-                                            <div>
-                                                <p className="text-xs text-muted-foreground">Status</p>
-                                                <Badge variant="outline" className="mt-0.5 text-xs font-normal">
-                                                    Active
-                                                </Badge>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
+            {/* Profile Header */}
+            <Card>
+                <CardContent className="p-6">
+                    <div className="flex flex-col items-start gap-6 md:flex-row md:items-center">
+                        <div className="relative">
+                            <Avatar className="h-24 w-24">
+                                <AvatarImage src={user.profile_image_url || undefined} alt={user.full_name} />
+                                <AvatarFallback className="text-2xl">{getInitials(user.full_name)}</AvatarFallback>
+                            </Avatar>
+                            {/* Camera Icon - maybe for upload later */}
+                            <Button
+                                size="icon"
+                                variant="outline"
+                                className="absolute -right-2 -bottom-2 h-8 w-8 rounded-full"
+                            >
+                                <Camera className="h-4 w-4" />
+                            </Button>
                         </div>
-                    </TabsContent>
-
-                    <TabsContent value="details">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Full Profile Information</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-6">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="space-y-4">
-                                        <h3 className="font-semibold text-foreground border-b pb-2">Personal Details</h3>
-                                        <div className="grid grid-cols-3 gap-2 text-sm">
-                                            <span className="text-muted-foreground">Full Name</span>
-                                            <span className="col-span-2 font-medium">{user.full_name}</span>
-
-                                            <span className="text-muted-foreground">Address</span>
-                                            <span className="col-span-2 font-medium">{user.address || 'N/A'}</span>
-
-                                            <span className="text-muted-foreground">Phone</span>
-                                            <span className="col-span-2 font-medium">{user.contact_number || 'N/A'}</span>
-
-                                            <span className="text-muted-foreground">Email</span>
-                                            <span className="col-span-2 font-medium">{user.email}</span>
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-4">
-                                        <h3 className="font-semibold text-foreground border-b pb-2">Academic Information</h3>
-                                        <div className="grid grid-cols-3 gap-2 text-sm">
-                                            <span className="text-muted-foreground">Student ID</span>
-                                            <span className="col-span-2 font-medium">{user.student_id || 'N/A'}</span>
-
-                                            <span className="text-muted-foreground">Course</span>
-                                            <span className="col-span-2 font-medium">{user.course || 'N/A'}</span>
-                                        </div>
-                                    </div>
+                        <div className="flex-1 space-y-2">
+                            <div className="flex flex-col gap-2 md:flex-row md:items-center">
+                                <h1 className="text-2xl font-bold">{user.full_name}</h1>
+                                <Badge variant="secondary">Intern</Badge>
+                                {user.is_active && <Badge className="bg-green-500 hover:bg-green-600">Active</Badge>}
+                            </div>
+                            <p className="text-muted-foreground">{user.course || 'Student'}</p>
+                            <div className="text-muted-foreground flex flex-wrap gap-4 text-sm">
+                                <div className="flex items-center gap-1">
+                                    <EnvelopeClosedIcon className="size-4" />
+                                    {user.email}
                                 </div>
-
-                                <div className="pt-4 border-t">
-                                    <div className="flex items-center justify-between text-sm text-muted-foreground">
-                                        <span>Account Created</span>
-                                        <span>{new Date(user.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                                {user.address && (
+                                    <div className="flex items-center gap-1">
+                                        <MapPin className="size-4" />
+                                        {user.address}
                                     </div>
+                                )}
+                                <div className="flex items-center gap-1">
+                                    <CalendarIcon className="size-4" />
+                                    Joined {new Date(user.created_at).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
                                 </div>
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
-                </Tabs>
-            </div>
+                            </div>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+
+            {/* Profile Content */}
+            <Tabs defaultValue="personal" className="space-y-6">
+                <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
+                    <TabsTrigger value="personal">Personal</TabsTrigger>
+                    <TabsTrigger value="account">Account</TabsTrigger>
+                    <TabsTrigger value="security">Security</TabsTrigger>
+                    <TabsTrigger value="notifications">Notifications</TabsTrigger>
+                </TabsList>
+
+                {/* Personal Information */}
+                <TabsContent value="personal" className="space-y-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Personal Information</CardTitle>
+                            <CardDescription>Your personal details and profile information.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                                <div className="space-y-2">
+                                    <Label htmlFor="firstName">First Name</Label>
+                                    <Input id="firstName" defaultValue={firstName} readOnly />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="lastName">Last Name</Label>
+                                    <Input id="lastName" defaultValue={lastName} readOnly />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="email">Email</Label>
+                                    <Input id="email" type="email" defaultValue={user.email} readOnly />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="phone">Phone</Label>
+                                    <Input id="phone" defaultValue={user.contact_number || ''} readOnly />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="course">Course</Label>
+                                    <Input id="course" defaultValue={user.course || ''} readOnly />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="studentId">Student ID</Label>
+                                    <Input id="studentId" defaultValue={user.student_id || ''} readOnly />
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="address">Address</Label>
+                                <Textarea
+                                    id="address"
+                                    defaultValue={user.address || ''}
+                                    rows={2}
+                                    readOnly
+                                />
+                            </div>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                {/* Account Settings */}
+                <TabsContent value="account" className="space-y-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Account Status</CardTitle>
+                            <CardDescription>Manage your account status.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            <div className="flex items-center justify-between">
+                                <div className="space-y-1">
+                                    <Label className="text-base">Account Status</Label>
+                                    <p className="text-muted-foreground text-sm">Your account is currently {user.is_active ? 'active' : 'inactive'}</p>
+                                </div>
+                                <Badge variant="outline" className={user.is_active ? "border-green-200 bg-green-50 text-green-700" : "border-red-200 bg-red-50 text-red-700"}>
+                                    {user.is_active ? 'Active' : 'Inactive'}
+                                </Badge>
+                            </div>
+                            <Separator />
+                            <div className="flex items-center justify-between">
+                                <div className="space-y-1">
+                                    <Label className="text-base">Internship Program</Label>
+                                    <p className="text-muted-foreground text-sm">Standard Internship Track</p>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                {/* Security Settings - Static Placeholder */}
+                <TabsContent value="security" className="space-y-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Security Settings</CardTitle>
+                            <CardDescription>Manage your account security.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <div className="space-y-1">
+                                        <Label className="text-base">Password</Label>
+                                        <p className="text-muted-foreground text-sm">Managed by Administrator</p>
+                                    </div>
+                                    <Button variant="outline" disabled>
+                                        <Key className="mr-2 h-4 w-4" />
+                                        Change Password
+                                    </Button>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                {/* Notification Settings - Static Placeholder */}
+                <TabsContent value="notifications" className="space-y-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Notification Preferences</CardTitle>
+                            <CardDescription>Choose what notifications you want to receive.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <div className="space-y-1">
+                                        <Label className="text-base">Email Notifications</Label>
+                                        <p className="text-muted-foreground text-sm">Receive notifications via email</p>
+                                    </div>
+                                    <Switch defaultChecked disabled />
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+            </Tabs>
         </div>
     );
 }
