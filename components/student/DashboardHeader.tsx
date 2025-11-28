@@ -36,7 +36,7 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
                 <Link href="/student/reports">
                     <Button variant="outline" size="sm" className="h-10 text-sm">My Reports</Button>
                 </Link>
-                <LogoutButton />
+                <LogoutButton variant="outline" size="sm" className="h-10 text-sm" />
             </div>
 
             {/* Mobile Navigation (Burger Menu) */}
