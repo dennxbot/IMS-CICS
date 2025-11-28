@@ -306,7 +306,8 @@ export async function clockOut(studentId: string, session: 1 | 2, remarks?: stri
     time_end: now,
     timer_status: 0, // Stopped
     total_hours: Math.round(totalHours * 100) / 100, // Round to 2 decimal places
-    updated_at: new Date().toISOString()
+    updated_at: new Date().toISOString(),
+    is_verified: true // Auto-verify since location/time checks passed at clock-in
   };
 
   if (remarks) {
