@@ -96,8 +96,14 @@ export function StudentProfileClient({ user }: StudentProfileClientProps) {
                 <TabsList className="grid w-full grid-cols-2 h-auto md:grid-cols-4 md:h-10">
                     <TabsTrigger value="personal">Personal</TabsTrigger>
                     <TabsTrigger value="account">Account</TabsTrigger>
-                    <TabsTrigger value="security">Security</TabsTrigger>
-                    <TabsTrigger value="notifications">Notifications</TabsTrigger>
+                    <TabsTrigger value="security" className="gap-2">
+                        Security
+                        <Badge variant="secondary" className="text-[10px] h-5 px-1.5">Coming Soon</Badge>
+                    </TabsTrigger>
+                    <TabsTrigger value="notifications" className="gap-2">
+                        Notifications
+                        <Badge variant="secondary" className="text-[10px] h-5 px-1.5">Coming Soon</Badge>
+                    </TabsTrigger>
                 </TabsList>
 
                 {/* Personal Information */}
