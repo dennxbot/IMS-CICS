@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceRoleClient } from '@/utils/supabase/service-role';
 import { createClient } from '@/utils/supabase/server';
+import { revalidatePath } from 'next/cache';
 
 // Force dynamic rendering for this API route due to cookie usage
 export const dynamic = 'force-dynamic';
@@ -8,7 +9,7 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   try {
     const supabase = createServiceRoleClient();
-    
+
     // Try to get system settings with all columns
     const { data: settings, error } = await supabase
       .from('system_settings')
@@ -17,7 +18,7 @@ export async function GET() {
 
     if (error) {
       console.error('Error fetching system settings:', error);
-      
+
       // If columns don't exist, try with basic columns only
       const { data: basicSettings, error: basicError } = await supabase
         .from('system_settings')
@@ -80,7 +81,7 @@ export async function PUT(request: NextRequest) {
     // For admin routes, we should check user type 1 (admin)
     const supabaseAuth = createClient();
     const { data: { user: authUser }, error: authError } = await supabaseAuth.auth.getUser();
-    
+
     if (authError || !authUser) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -101,13 +102,13 @@ export async function PUT(request: NextRequest) {
         { status: 403 }
       );
     }
-    
+
     const supabase = createServiceRoleClient();
     const body = await request.json();
 
     // Validate the input
-    const { 
-      restrict_report_submission, 
+    const {
+      restrict_report_submission,
       report_submission_days,
       name,
       logo_url,
@@ -176,6 +177,10 @@ export async function PUT(request: NextRequest) {
     }
 
     // Return the actual database values (not the request parameters)
+
+    // Revalidate the layout to reflect changes immediately
+    revalidatePath('/', 'layout');
+
     return NextResponse.json({ settings });
   } catch (error) {
     console.error('Unexpected error updating system settings:', error);
