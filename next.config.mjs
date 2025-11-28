@@ -2,19 +2,24 @@
 const nextConfig = {
   // Enable React strict mode for better development experience
   reactStrictMode: true,
-  
+
   // Optimize images for production
   images: {
-    domains: ['localhost', 'csu.edu.ph'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**',
+      },
+    ],
     formats: ['image/webp', 'image/avif'],
   },
-  
+
   // Environment variables that should be exposed to the client
   env: {
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   },
-  
+
   // Headers for security and performance
   async headers() {
     return [
@@ -37,7 +42,7 @@ const nextConfig = {
       },
     ];
   },
-  
+
   // Webpack configuration for production optimization
   webpack: (config, { isServer }) => {
     if (!isServer) {
