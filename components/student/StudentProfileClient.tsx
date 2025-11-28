@@ -68,7 +68,7 @@ export function StudentProfileClient({ user }: StudentProfileClientProps) {
             </div>
 
             {/* Profile Info (Name, Course, Badges) - Now outside cover area */}
-            <div className="px-4 md:px-10 mt-4 mb-8 flex flex-col md:flex-row items-center md:items-start gap-4">
+            <div className="px-4 md:px-10 mt-20 md:mt-4 mb-8 flex flex-col md:flex-row items-center md:items-start gap-4">
                 {/* Spacer for Desktop Avatar alignment */}
                 <div className="hidden md:block w-40 shrink-0" /> {/* Matches Avatar width */}
 
