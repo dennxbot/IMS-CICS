@@ -17,26 +17,26 @@ const updateThemeImmediately = (primaryColor: string, secondaryColor: string) =>
     document.documentElement.style.setProperty('--primary-hue', primaryHsl.h.toString());
     document.documentElement.style.setProperty('--primary-saturation', `${primaryHsl.s}%`);
     document.documentElement.style.setProperty('--primary-lightness', `${primaryHsl.l}%`);
-    
+
     const primaryForeground = primaryHsl.l > 50 ? '10%' : '98%';
     document.documentElement.style.setProperty('--primary-foreground-lightness', primaryForeground);
   }
-  
+
   // Update secondary color
   if (secondaryColor) {
     const secondaryHsl = hexToHsl(secondaryColor);
     document.documentElement.style.setProperty('--secondary-hue', secondaryHsl.h.toString());
     document.documentElement.style.setProperty('--secondary-saturation', `${secondaryHsl.s}%`);
     document.documentElement.style.setProperty('--secondary-lightness', `${secondaryHsl.l}%`);
-    
+
     const secondaryForeground = secondaryHsl.l > 50 ? '10%' : '98%';
     document.documentElement.style.setProperty('--secondary-foreground-lightness', secondaryForeground);
   }
-  
+
   // Force browser to recalculate styles
-    document.documentElement.style.display = 'none';
-    void document.documentElement.offsetHeight; // Force reflow
-    document.documentElement.style.display = '';
+  document.documentElement.style.display = 'none';
+  void document.documentElement.offsetHeight; // Force reflow
+  document.documentElement.style.display = '';
 };
 
 interface HSL {
@@ -48,15 +48,15 @@ interface HSL {
 function hexToHsl(hex: string): HSL {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   if (!result) return { h: 222.2, s: 47.4, l: 11.2 };
-  
+
   const r = parseInt(result[1], 16) / 255;
   const g = parseInt(result[2], 16) / 255;
   const b = parseInt(result[3], 16) / 255;
-  
+
   const max = Math.max(r, g, b);
   const min = Math.min(r, g, b);
   const diff = max - min;
-  
+
   let hue = 0;
   if (diff !== 0) {
     if (max === r) {
@@ -67,16 +67,16 @@ function hexToHsl(hex: string): HSL {
       hue = (r - g) / diff + 4;
     }
   }
-  
+
   hue = Math.round(hue * 60);
   if (hue < 0) hue += 360;
-  
+
   const lightness = (max + min) / 2;
-  
+
   if (diff === 0) return { h: hue, s: 0, l: lightness * 100 };
-  
+
   const saturation = diff / (1 - Math.abs(2 * lightness - 1));
-  
+
   return {
     h: hue,
     s: saturation * 100,
@@ -91,19 +91,19 @@ const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Satur
 function calculateDuration(startTime: string, endTime: string): number {
   const [startHours, startMinutes] = startTime.split(':').map(Number);
   const [endHours, endMinutes] = endTime.split(':').map(Number);
-  
+
   // Convert to total minutes
   const startTotalMinutes = startHours * 60 + startMinutes;
   const endTotalMinutes = endHours * 60 + endMinutes;
-  
+
   // Calculate duration in minutes
   let durationMinutes = endTotalMinutes - startTotalMinutes;
-  
+
   // Handle cases where end time is on the next day (e.g., 23:00 to 01:00)
   if (durationMinutes < 0) {
     durationMinutes += 24 * 60; // Add 24 hours
   }
-  
+
   // Convert to hours with 0.5 hour precision
   const durationHours = durationMinutes / 60;
   return Math.round(durationHours * 2) / 2; // Round to nearest 0.5
@@ -112,7 +112,7 @@ function calculateDuration(startTime: string, endTime: string): number {
 export default function AdminSettings() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  
+
   // Form state
   const [systemName, setSystemName] = useState('');
   const [logoUrl, setLogoUrl] = useState('');
@@ -124,7 +124,7 @@ export default function AdminSettings() {
   const [attendanceVerificationRequired, setAttendanceVerificationRequired] = useState(true);
   const [restrictReportSubmission, setRestrictReportSubmission] = useState(false);
   const [reportSubmissionDays, setReportSubmissionDays] = useState<string[]>(['6']); // Default to Saturday
-  
+
   // Session time configuration
   const [morningCheckinTime, setMorningCheckinTime] = useState('07:45');
   const [morningCheckoutTime, setMorningCheckoutTime] = useState('11:45');
@@ -140,15 +140,15 @@ export default function AdminSettings() {
   const loadSettings = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch('/api/admin/system-settings');
-      
+      const response = await fetch('/api/admin/system-settings', { cache: 'no-store' });
+
       if (!response.ok) {
         throw new Error('Failed to load settings');
       }
-      
+
       const data = await response.json();
       const systemSettings = data.settings;
-      
+
       setSystemName(systemSettings.name || '');
       setLogoUrl(systemSettings.logo_url || '');
       setPrimaryColor(systemSettings.primary_color || '#3B82F6');
@@ -159,7 +159,7 @@ export default function AdminSettings() {
       setAttendanceVerificationRequired(systemSettings.attendance_verification_required || true);
       setRestrictReportSubmission(systemSettings.restrict_report_submission || false);
       setReportSubmissionDays(systemSettings.report_submission_days ? systemSettings.report_submission_days.split(',') : ['6']);
-      
+
       // Load session time settings
       setMorningCheckinTime(systemSettings.morning_checkin_time || '07:45');
       setMorningCheckoutTime(systemSettings.morning_checkout_time || '11:45');
@@ -178,7 +178,7 @@ export default function AdminSettings() {
   const handleSaveSettings = async () => {
     try {
       setIsSaving(true);
-      
+
       const payload = {
         name: systemName,
         logo_url: logoUrl,
@@ -197,7 +197,7 @@ export default function AdminSettings() {
         afternoon_checkout_time: afternoonCheckoutTime,
         afternoon_duration: afternoonDuration
       };
-      
+
       const response = await fetch('/api/admin/system-settings', {
         method: 'PUT',
         headers: {
@@ -205,21 +205,21 @@ export default function AdminSettings() {
         },
         body: JSON.stringify(payload)
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
         throw new Error(errorData.error || 'Failed to save settings');
       }
-      
+
       await response.json();
       toast.success('Settings saved successfully!');
-      
+
       // Reload settings from server to ensure UI reflects latest changes
       await loadSettings();
-      
+
       // Immediately update theme colors without page reload
       updateThemeImmediately(primaryColor, secondaryColor);
-      
+
       // Dispatch event for any theme updater components
       window.dispatchEvent(new CustomEvent('theme-update', {
         detail: { primaryColor, secondaryColor }
@@ -278,7 +278,7 @@ export default function AdminSettings() {
                 placeholder="Enter system name"
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="logoUrl">Logo URL</Label>
               <Input
@@ -387,7 +387,7 @@ export default function AdminSettings() {
                 placeholder="Enter minimum weekly hours"
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="maxDailyHours">Maximum Daily Hours</Label>
               <Input
@@ -529,7 +529,7 @@ export default function AdminSettings() {
               />
               <Label htmlFor="emailNotifications">Enable Email Notifications</Label>
             </div>
-            
+
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="attendanceVerification"
