@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-    Mail, Phone, GraduationCap, Calendar,
+    Mail, Phone, GraduationCap,
     ArrowLeft, Copy, Check, Building, Clock
 } from "lucide-react";
 import Link from "next/link";
@@ -169,15 +169,7 @@ export function StudentProfileClient({ user }: StudentProfileClientProps) {
                                             </div>
                                         </div>
 
-                                        <div className="flex items-center gap-3">
-                                            <div className="p-2 bg-primary/10 rounded-full text-primary">
-                                                <Calendar className="h-4 w-4" />
-                                            </div>
-                                            <div>
-                                                <p className="text-xs text-muted-foreground">Year Level</p>
-                                                <p className="text-sm font-medium">{user.year_level || 'N/A'}</p>
-                                            </div>
-                                        </div>
+
                                     </div>
                                 </CardContent>
                             </Card>
@@ -248,8 +240,7 @@ export function StudentProfileClient({ user }: StudentProfileClientProps) {
                                             <span className="text-muted-foreground">Course</span>
                                             <span className="col-span-2 font-medium">{user.course || 'N/A'}</span>
 
-                                            <span className="text-muted-foreground">Year Level</span>
-                                            <span className="col-span-2 font-medium">{user.year_level || 'N/A'}</span>
+
                                         </div>
                                     </div>
                                 </div>
