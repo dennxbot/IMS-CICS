@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Clock, Calendar, FileText, CheckCircle, Timer, Info } from "lucide-react";
 import Link from "next/link";
 import { ClockButton } from "@/components/student/ClockButton";
-import { LogoutButton } from "@/components/LogoutButton";
+import { DashboardHeader } from "@/components/student/DashboardHeader";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { createClient } from "@/utils/supabase/server";
 import { formatPhilippineDateDisplay } from "@/lib/timeUtils";
@@ -149,24 +149,7 @@ export default async function StudentDashboard() {
   return (
     <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 sm:gap-0">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Student Dashboard</h1>
-          <p className="text-sm sm:text-base text-gray-600">Welcome back, {user.full_name}</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Link href="/student/profile">
-            <Button variant="outline" size="sm" className="h-10 text-sm">Profile</Button>
-          </Link>
-          <Link href="/student/attendance">
-            <Button variant="outline" size="sm" className="h-10 text-sm">My Attendance</Button>
-          </Link>
-          <Link href="/student/reports">
-            <Button variant="outline" size="sm" className="h-10 text-sm">My Reports</Button>
-          </Link>
-          <LogoutButton />
-        </div>
-      </div>
+      <DashboardHeader user={user} />
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
