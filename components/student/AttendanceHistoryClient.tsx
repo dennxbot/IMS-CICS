@@ -107,57 +107,67 @@ export function AttendanceHistoryClient({ initialData }: AttendanceHistoryClient
                     </CardHeader>
                     <CardContent className="print:p-0">
                         {filteredData.length > 0 ? (
-                            <div className="rounded-md border print:border-black">
-                                <Table>
+                            <div className="rounded-md border print:border-none print:rounded-none print:overflow-visible">
+                                <Table className="print:w-full print:table-fixed">
                                     <TableHeader>
-                                        <TableRow className="print:border-black">
-                                            <TableHead className="print:text-black print:font-bold">Date</TableHead>
-                                            <TableHead className="print:text-black print:font-bold">Session</TableHead>
-                                            <TableHead className="print:text-black print:font-bold">Time In</TableHead>
-                                            <TableHead className="print:text-black print:font-bold">Time Out</TableHead>
-                                            <TableHead className="print:text-black print:font-bold">Duration</TableHead>
-                                            <TableHead className="print:text-black print:font-bold">Status</TableHead>
-                                            <TableHead className="print:text-black print:font-bold">Remarks</TableHead>
+                                        <TableRow className="print:border-black print:border-b-2">
+                                            <TableHead className="print:text-black print:font-bold print:border-black print:border">Date</TableHead>
+                                            <TableHead className="print:text-black print:font-bold print:border-black print:border">Session</TableHead>
+                                            <TableHead className="print:text-black print:font-bold print:border-black print:border">Time In</TableHead>
+                                            <TableHead className="print:text-black print:font-bold print:border-black print:border">Time Out</TableHead>
+                                            <TableHead className="print:text-black print:font-bold print:border-black print:border">Duration</TableHead>
+                                            <TableHead className="print:text-black print:font-bold print:border-black print:border">Status</TableHead>
+                                            <TableHead className="print:text-black print:font-bold print:border-black print:border">Remarks</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
                                         {filteredData.map((record) => (
                                             <TableRow key={record.id} className="print:border-black">
-                                                <TableCell className="font-medium print:text-black">
+                                                <TableCell className="font-medium print:text-black print:border-black print:border">
                                                     {formatPhilippineDateDisplay(new Date(record.date))}
                                                 </TableCell>
-                                                <TableCell className="print:text-black">
-                                                    <Badge variant="outline" className="print:border-black print:text-black">
+                                                <TableCell className="print:text-black print:border-black print:border">
+                                                    <span className="print:hidden">
+                                                        <Badge variant="outline">
+                                                            {record.session === 1 ? 'Morning' : 'Afternoon'}
+                                                        </Badge>
+                                                    </span>
+                                                    <span className="hidden print:inline">
                                                         {record.session === 1 ? 'Morning' : 'Afternoon'}
-                                                    </Badge>
+                                                    </span>
                                                 </TableCell>
-                                                <TableCell className="print:text-black">
+                                                <TableCell className="print:text-black print:border-black print:border">
                                                     <div className="flex items-center gap-1 text-green-600 print:text-black">
                                                         <Clock className="h-3 w-3 print:hidden" />
                                                         {formatTime(record.time_start)}
                                                     </div>
                                                 </TableCell>
-                                                <TableCell className="print:text-black">
+                                                <TableCell className="print:text-black print:border-black print:border">
                                                     {record.time_end ? (
                                                         <div className="flex items-center gap-1 text-red-600 print:text-black">
                                                             <Clock className="h-3 w-3 print:hidden" />
                                                             {formatTime(record.time_end)}
                                                         </div>
                                                     ) : (
-                                                        <Badge variant="secondary" className="print:border-black print:text-black">Ongoing</Badge>
+                                                        <span className="print:text-black">Ongoing</span>
                                                     )}
                                                 </TableCell>
-                                                <TableCell className="print:text-black">
+                                                <TableCell className="print:text-black print:border-black print:border">
                                                     {record.total_hours > 0 ? `${record.total_hours} hrs` : '-'}
                                                 </TableCell>
-                                                <TableCell className="print:text-black">
-                                                    {record.is_verified ? (
-                                                        <Badge className="bg-green-500 hover:bg-green-600 print:bg-transparent print:text-black print:border print:border-black">Verified</Badge>
-                                                    ) : (
-                                                        <Badge variant="secondary" className="print:bg-transparent print:text-black print:border print:border-black">Pending</Badge>
-                                                    )}
+                                                <TableCell className="print:text-black print:border-black print:border">
+                                                    <span className="print:hidden">
+                                                        {record.is_verified ? (
+                                                            <Badge className="bg-green-500 hover:bg-green-600">Verified</Badge>
+                                                        ) : (
+                                                            <Badge variant="secondary">Pending</Badge>
+                                                        )}
+                                                    </span>
+                                                    <span className="hidden print:inline">
+                                                        {record.is_verified ? 'Verified' : 'Pending'}
+                                                    </span>
                                                 </TableCell>
-                                                <TableCell className="max-w-[200px] truncate print:max-w-none print:text-black" title={record.remarks || ''}>
+                                                <TableCell className="max-w-[200px] truncate print:max-w-none print:text-black print:border-black print:border print:whitespace-normal" title={record.remarks || ''}>
                                                     {record.remarks || '-'}
                                                 </TableCell>
                                             </TableRow>
