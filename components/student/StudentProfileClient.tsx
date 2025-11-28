@@ -98,11 +98,11 @@ export function StudentProfileClient({ user }: StudentProfileClientProps) {
                     <TabsTrigger value="account">Account</TabsTrigger>
                     <TabsTrigger value="security" className="relative overflow-visible">
                         Security
-                        <Badge variant="secondary" className="absolute -top-2 -right-3 text-[9px] h-4 px-1 shadow-sm border-white/50">Soon</Badge>
+                        <Badge variant="secondary" className="absolute top-0 right-0 transform translate-x-1 -translate-y-1 text-[9px] h-3.5 px-1 shadow-sm border-white/50 scale-90">Soon</Badge>
                     </TabsTrigger>
                     <TabsTrigger value="notifications" className="relative overflow-visible">
                         Notifications
-                        <Badge variant="secondary" className="absolute -top-2 -right-3 text-[9px] h-4 px-1 shadow-sm border-white/50">Soon</Badge>
+                        <Badge variant="secondary" className="absolute top-0 right-0 transform translate-x-1 -translate-y-1 text-[9px] h-3.5 px-1 shadow-sm border-white/50 scale-90">Soon</Badge>
                     </TabsTrigger>
                 </TabsList>
 
