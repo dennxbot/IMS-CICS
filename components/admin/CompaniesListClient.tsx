@@ -47,6 +47,32 @@ interface CompaniesListClientProps {
   initialCompanies: Company[];
 }
 
+const ExpandableDescription = ({ text }: { text: string }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const shouldTruncate = text.length > 100;
+
+  if (!shouldTruncate) {
+    return <p className="text-xs text-gray-600 italic">{text}</p>;
+  }
+
+  return (
+    <div className="flex flex-col items-start">
+      <p className={`text-xs text-gray-600 italic ${!isExpanded ? 'line-clamp-2' : ''}`}>
+        {text}
+      </p>
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+          setIsExpanded(!isExpanded);
+        }}
+        className="text-blue-600 hover:text-blue-800 text-xs font-medium mt-0.5 focus:outline-none"
+      >
+        {isExpanded ? 'Show Less' : 'Read More'}
+      </button>
+    </div>
+  );
+};
+
 export default function CompaniesListClient({ initialCompanies }: CompaniesListClientProps) {
   const [companies, setCompanies] = useState<Company[]>(initialCompanies);
 
@@ -121,9 +147,7 @@ export default function CompaniesListClient({ initialCompanies }: CompaniesListC
             </CardHeader>
             <CardContent className="space-y-3">
               {company.description && (
-                <p className="text-xs text-gray-600 line-clamp-2 italic">
-                  {company.description}
-                </p>
+                <ExpandableDescription text={company.description} />
               )}
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
