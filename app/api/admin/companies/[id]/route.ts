@@ -63,31 +63,36 @@ export async function PUT(
       );
     }
 
-    // Validate GPS coordinates if provided
-    if (data.latitude !== null && data.longitude !== null) {
-      const lat = parseFloat(data.latitude);
-      const lng = parseFloat(data.longitude);
+    // Validate GPS coordinates (Required)
+    if (data.latitude === null || data.longitude === null || data.latitude === undefined || data.longitude === undefined) {
+      return NextResponse.json(
+        { error: "Location coordinates (Latitude and Longitude) are required" },
+        { status: 400 }
+      );
+    }
 
-      if (isNaN(lat) || isNaN(lng)) {
-        return NextResponse.json(
-          { error: "Please enter valid GPS coordinates" },
-          { status: 400 }
-        );
-      }
+    const lat = parseFloat(data.latitude);
+    const lng = parseFloat(data.longitude);
 
-      if (lat < -90 || lat > 90) {
-        return NextResponse.json(
-          { error: "Latitude must be between -90 and 90" },
-          { status: 400 }
-        );
-      }
+    if (isNaN(lat) || isNaN(lng)) {
+      return NextResponse.json(
+        { error: "Please enter valid GPS coordinates" },
+        { status: 400 }
+      );
+    }
 
-      if (lng < -180 || lng > 180) {
-        return NextResponse.json(
-          { error: "Longitude must be between -180 and 180" },
-          { status: 400 }
-        );
-      }
+    if (lat < -90 || lat > 90) {
+      return NextResponse.json(
+        { error: "Latitude must be between -90 and 90" },
+        { status: 400 }
+      );
+    }
+
+    if (lng < -180 || lng > 180) {
+      return NextResponse.json(
+        { error: "Longitude must be between -180 and 180" },
+        { status: 400 }
+      );
     }
 
     // Validate radius

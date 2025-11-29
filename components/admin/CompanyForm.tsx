@@ -77,22 +77,24 @@ export default function CompanyForm({ company }: CompanyFormProps) {
         throw new Error('Please enter a valid contact number');
       }
 
-      // Validate GPS coordinates
-      if (formData.latitude && formData.longitude) {
-        const lat = parseFloat(formData.latitude);
-        const lng = parseFloat(formData.longitude);
+      // Validate GPS coordinates (Required)
+      if (!formData.latitude || !formData.longitude) {
+        throw new Error('Please provide location coordinates (Latitude and Longitude)');
+      }
 
-        if (isNaN(lat) || isNaN(lng)) {
-          throw new Error('Please enter valid GPS coordinates');
-        }
+      const lat = parseFloat(formData.latitude);
+      const lng = parseFloat(formData.longitude);
 
-        if (lat < -90 || lat > 90) {
-          throw new Error('Latitude must be between -90 and 90');
-        }
+      if (isNaN(lat) || isNaN(lng)) {
+        throw new Error('Please enter valid GPS coordinates');
+      }
 
-        if (lng < -180 || lng > 180) {
-          throw new Error('Longitude must be between -180 and 180');
-        }
+      if (lat < -90 || lat > 90) {
+        throw new Error('Latitude must be between -90 and 90');
+      }
+
+      if (lng < -180 || lng > 180) {
+        throw new Error('Longitude must be between -180 and 180');
       }
 
       // Validate radius
@@ -129,8 +131,8 @@ export default function CompanyForm({ company }: CompanyFormProps) {
         name: formData.name.trim(),
         contact: formData.contact.trim(),
         address: formData.address.trim(),
-        latitude: formData.latitude ? parseFloat(formData.latitude) : null,
-        longitude: formData.longitude ? parseFloat(formData.longitude) : null,
+        latitude: lat,
+        longitude: lng,
         radius: radius,
         total_required_hours: totalRequiredHours,
         working_days: formData.working_days,
@@ -447,7 +449,7 @@ export default function CompanyForm({ company }: CompanyFormProps) {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div className="space-y-2">
-              <Label htmlFor="latitude" className="text-sm sm:text-base">Latitude</Label>
+              <Label htmlFor="latitude" className="text-sm sm:text-base">Latitude <span className="text-red-500">*</span></Label>
               <Input
                 id="latitude"
                 name="latitude"
@@ -456,12 +458,13 @@ export default function CompanyForm({ company }: CompanyFormProps) {
                 placeholder="e.g., 14.5995"
                 value={formData.latitude}
                 onChange={handleInputChange}
+                required
                 className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="longitude" className="text-sm sm:text-base">Longitude</Label>
+              <Label htmlFor="longitude" className="text-sm sm:text-base">Longitude <span className="text-red-500">*</span></Label>
               <Input
                 id="longitude"
                 name="longitude"
@@ -470,6 +473,7 @@ export default function CompanyForm({ company }: CompanyFormProps) {
                 placeholder="e.g., 120.9842"
                 value={formData.longitude}
                 onChange={handleInputChange}
+                required
                 className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base"
               />
             </div>
