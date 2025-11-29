@@ -4,7 +4,7 @@ import { requireAuth } from '@/lib/auth';
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Check authentication and admin access
@@ -16,8 +16,9 @@ export async function PUT(
       );
     }
 
+    const { id } = await params;
     const supabase = createServiceRoleClient();
-    const companyId = parseInt(params.id);
+    const companyId = parseInt(id);
     const data = await request.json();
 
     // Validate company ID
@@ -66,21 +67,21 @@ export async function PUT(
     if (data.latitude !== null && data.longitude !== null) {
       const lat = parseFloat(data.latitude);
       const lng = parseFloat(data.longitude);
-      
+
       if (isNaN(lat) || isNaN(lng)) {
         return NextResponse.json(
           { error: "Please enter valid GPS coordinates" },
           { status: 400 }
         );
       }
-      
+
       if (lat < -90 || lat > 90) {
         return NextResponse.json(
           { error: "Latitude must be between -90 and 90" },
           { status: 400 }
         );
       }
-      
+
       if (lng < -180 || lng > 180) {
         return NextResponse.json(
           { error: "Longitude must be between -180 and 180" },
@@ -104,7 +105,14 @@ export async function PUT(
       .update({
         name: data.name.trim(),
         contact_number: data.contact.trim(),
-        address: data.address.trim()
+        address: data.address.trim(),
+        latitude: data.latitude,
+        longitude: data.longitude,
+        radius: radius,
+        total_required_hours: data.total_required_hours,
+        working_days: data.working_days,
+        daily_hours_limit: data.daily_hours_limit,
+        max_weekly_hours: data.max_weekly_hours
       })
       .eq('id', companyId)
       .select()
@@ -118,9 +126,9 @@ export async function PUT(
     }
 
     return NextResponse.json(
-      { 
+      {
         message: "Company updated successfully",
-        company: updatedCompany 
+        company: updatedCompany
       },
       { status: 200 }
     );
