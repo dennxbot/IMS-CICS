@@ -13,7 +13,10 @@ import {
   MapIcon,
   Edit,
   Plus,
-  Clock
+  Clock,
+  User,
+  Mail,
+  Globe
 } from 'lucide-react';
 
 interface Company {
@@ -30,6 +33,12 @@ interface Company {
   working_days?: string;
   daily_hours_limit?: number;
   max_weekly_hours?: number;
+  contact_person?: string;
+  contact_email?: string;
+  industry_type?: string;
+  company_size?: string;
+  website?: string;
+  description?: string;
 }
 
 interface CompaniesListClientProps {
@@ -81,9 +90,17 @@ export default function CompaniesListClient({ initialCompanies }: CompaniesListC
             <CardHeader>
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
                 <div className="flex-1">
-                  <CardTitle className="text-base sm:text-lg">{company.name}</CardTitle>
+                  <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+                    {company.name}
+                    {company.industry_type && (
+                      <Badge variant="outline" className="text-xs font-normal">
+                        {company.industry_type}
+                      </Badge>
+                    )}
+                  </CardTitle>
                   <CardDescription className="mt-1 text-sm">
                     {company.student_count} student{company.student_count !== 1 ? 's' : ''} assigned
+                    {company.company_size && ` • ${company.company_size}`}
                   </CardDescription>
                 </div>
                 <div className="flex space-x-2">
@@ -101,12 +118,42 @@ export default function CompaniesListClient({ initialCompanies }: CompaniesListC
               </div>
             </CardHeader>
             <CardContent className="space-y-3">
-              <div className="flex items-center space-x-2 text-xs sm:text-sm">
-                <Phone className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500" />
-                <span>{company.contact_number}</span>
+              {company.description && (
+                <p className="text-xs text-gray-600 line-clamp-2 italic">
+                  {company.description}
+                </p>
+              )}
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2 text-xs sm:text-sm">
+                    <User className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500" />
+                    <span>{company.contact_person || 'No contact person'}</span>
+                  </div>
+                  <div className="flex items-center space-x-2 text-xs sm:text-sm">
+                    <Phone className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500" />
+                    <span>{company.contact_number}</span>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  {company.contact_email && (
+                    <div className="flex items-center space-x-2 text-xs sm:text-sm">
+                      <Mail className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500" />
+                      <span className="truncate">{company.contact_email}</span>
+                    </div>
+                  )}
+                  {company.website && (
+                    <div className="flex items-center space-x-2 text-xs sm:text-sm">
+                      <Globe className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500" />
+                      <a href={company.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline truncate">
+                        Website
+                      </a>
+                    </div>
+                  )}
+                </div>
               </div>
 
-              <div className="flex items-start space-x-2 text-xs sm:text-sm">
+              <div className="flex items-start space-x-2 text-xs sm:text-sm pt-2 border-t">
                 <MapPin className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500 mt-0.5" />
                 <span className="flex-1">{company.address}</span>
               </div>
@@ -138,7 +185,7 @@ export default function CompaniesListClient({ initialCompanies }: CompaniesListC
                 </div>
               </div>
 
-              <div className="text-xs text-gray-500">
+              <div className="text-xs text-gray-500 pt-2">
                 Created {new Date(company.created_at).toLocaleDateString()}
               </div>
             </CardContent>

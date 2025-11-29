@@ -23,6 +23,12 @@ interface CompanyFormProps {
     working_days?: string;
     daily_hours_limit?: number;
     max_weekly_hours?: number;
+    contact_person?: string;
+    contact_email?: string;
+    industry_type?: string;
+    company_size?: string;
+    website?: string;
+    description?: string;
   };
 }
 
@@ -40,7 +46,13 @@ export default function CompanyForm({ company }: CompanyFormProps) {
     total_required_hours: company?.total_required_hours?.toString() || '500',
     working_days: company?.working_days || '1,2,3,4,5',
     daily_hours_limit: company?.daily_hours_limit?.toString() || '8.0',
-    max_weekly_hours: company?.max_weekly_hours?.toString() || '40.0'
+    max_weekly_hours: company?.max_weekly_hours?.toString() || '40.0',
+    contact_person: company?.contact_person || '',
+    contact_email: company?.contact_email || '',
+    industry_type: company?.industry_type || '',
+    company_size: company?.company_size || '',
+    website: company?.website || '',
+    description: company?.description || ''
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -59,25 +71,25 @@ export default function CompanyForm({ company }: CompanyFormProps) {
         throw new Error('Please fill in all required fields');
       }
 
-      // Validate contact number format (basic validation)
+      // Validate contact number format
       const contactRegex = /^[\+\d\s\-\(\)]+$/;
       if (!contactRegex.test(formData.contact)) {
         throw new Error('Please enter a valid contact number');
       }
 
-      // Validate GPS coordinates if provided
+      // Validate GPS coordinates
       if (formData.latitude && formData.longitude) {
         const lat = parseFloat(formData.latitude);
         const lng = parseFloat(formData.longitude);
-        
+
         if (isNaN(lat) || isNaN(lng)) {
           throw new Error('Please enter valid GPS coordinates');
         }
-        
+
         if (lat < -90 || lat > 90) {
           throw new Error('Latitude must be between -90 and 90');
         }
-        
+
         if (lng < -180 || lng > 180) {
           throw new Error('Longitude must be between -180 and 180');
         }
@@ -123,7 +135,13 @@ export default function CompanyForm({ company }: CompanyFormProps) {
         total_required_hours: totalRequiredHours,
         working_days: formData.working_days,
         daily_hours_limit: dailyHoursLimit,
-        max_weekly_hours: maxWeeklyHours
+        max_weekly_hours: maxWeeklyHours,
+        contact_person: formData.contact_person.trim(),
+        contact_email: formData.contact_email.trim(),
+        industry_type: formData.industry_type.trim(),
+        company_size: formData.company_size.trim(),
+        website: formData.website.trim(),
+        description: formData.description.trim()
       };
 
       const url = company ? `/api/admin/companies/${company.id}` : '/api/admin/companies';
@@ -184,11 +202,11 @@ export default function CompanyForm({ company }: CompanyFormProps) {
 
       <Card>
         <CardHeader>
-        <CardTitle className="text-lg sm:text-xl">Company Information</CardTitle>
-        <CardDescription className="text-sm sm:text-base">
-          {company ? 'Update company details' : 'Add a new company to the system'}
-        </CardDescription>
-      </CardHeader>
+          <CardTitle className="text-lg sm:text-xl">Company Information</CardTitle>
+          <CardDescription className="text-sm sm:text-base">
+            {company ? 'Update company details' : 'Add a new company to the system'}
+          </CardDescription>
+        </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="name" className="text-sm sm:text-base">
@@ -203,6 +221,36 @@ export default function CompanyForm({ company }: CompanyFormProps) {
               required
               className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base"
             />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="contact_person" className="text-sm sm:text-base">
+                Contact Person
+              </Label>
+              <Input
+                id="contact_person"
+                name="contact_person"
+                placeholder="e.g., John Doe"
+                value={formData.contact_person}
+                onChange={handleInputChange}
+                className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="contact_email" className="text-sm sm:text-base">
+                Contact Email
+              </Label>
+              <Input
+                id="contact_email"
+                name="contact_email"
+                type="email"
+                placeholder="e.g., john@company.com"
+                value={formData.contact_email}
+                onChange={handleInputChange}
+                className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base"
+              />
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -231,6 +279,65 @@ export default function CompanyForm({ company }: CompanyFormProps) {
               value={formData.address}
               onChange={handleInputChange}
               required
+              rows={3}
+              className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="industry_type" className="text-sm sm:text-base">
+                Industry Type
+              </Label>
+              <Input
+                id="industry_type"
+                name="industry_type"
+                placeholder="e.g., Technology, Healthcare"
+                value={formData.industry_type}
+                onChange={handleInputChange}
+                className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="company_size" className="text-sm sm:text-base">
+                Company Size
+              </Label>
+              <Input
+                id="company_size"
+                name="company_size"
+                placeholder="e.g., 50-100 employees"
+                value={formData.company_size}
+                onChange={handleInputChange}
+                className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="website" className="text-sm sm:text-base">
+              Website
+            </Label>
+            <Input
+              id="website"
+              name="website"
+              type="url"
+              placeholder="e.g., https://example.com"
+              value={formData.website}
+              onChange={handleInputChange}
+              className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="description" className="text-sm sm:text-base">
+              Description
+            </Label>
+            <Textarea
+              id="description"
+              name="description"
+              placeholder="Brief description of the company"
+              value={formData.description}
+              onChange={handleInputChange}
               rows={3}
               className="border-gray-300 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base"
             />
@@ -335,11 +442,11 @@ export default function CompanyForm({ company }: CompanyFormProps) {
 
       <Card>
         <CardHeader>
-        <CardTitle className="text-lg sm:text-xl">Location Settings</CardTitle>
-        <CardDescription className="text-sm sm:text-base">
-          GPS coordinates and geofencing settings for attendance tracking
-        </CardDescription>
-      </CardHeader>
+          <CardTitle className="text-lg sm:text-xl">Location Settings</CardTitle>
+          <CardDescription className="text-sm sm:text-base">
+            GPS coordinates and geofencing settings for attendance tracking
+          </CardDescription>
+        </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div className="space-y-2">

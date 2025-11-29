@@ -26,6 +26,12 @@ interface Company {
   working_days?: string;
   daily_hours_limit?: number;
   max_weekly_hours?: number;
+  contact_person?: string;
+  contact_email?: string;
+  industry_type?: string;
+  company_size?: string;
+  website?: string;
+  description?: string;
 }
 
 async function getCompanies(): Promise<Company[]> {

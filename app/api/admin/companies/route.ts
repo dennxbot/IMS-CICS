@@ -6,7 +6,7 @@ export async function GET() {
   try {
     // Create service role client for admin operations
     const supabase = createServiceRoleClient();
-    
+
     // For service role client, we need to check authentication differently
     // Let's fetch all companies without authentication check for now
     // The middleware will handle basic auth, and we can enhance security later
@@ -75,21 +75,21 @@ export async function POST(request: NextRequest) {
     if (data.latitude !== null && data.longitude !== null) {
       const lat = parseFloat(data.latitude);
       const lng = parseFloat(data.longitude);
-      
+
       if (isNaN(lat) || isNaN(lng)) {
         return NextResponse.json(
           { error: "Please enter valid GPS coordinates" },
           { status: 400 }
         );
       }
-      
+
       if (lat < -90 || lat > 90) {
         return NextResponse.json(
           { error: "Latitude must be between -90 and 90" },
           { status: 400 }
         );
       }
-      
+
       if (lng < -180 || lng > 180) {
         return NextResponse.json(
           { error: "Longitude must be between -180 and 180" },
@@ -116,7 +116,17 @@ export async function POST(request: NextRequest) {
         address: data.address.trim(),
         latitude: data.latitude !== null ? parseFloat(data.latitude) : null,
         longitude: data.longitude !== null ? parseFloat(data.longitude) : null,
-        radius: radius
+        radius: radius,
+        total_required_hours: data.total_required_hours,
+        working_days: data.working_days,
+        daily_hours_limit: data.daily_hours_limit,
+        max_weekly_hours: data.max_weekly_hours,
+        contact_person: data.contact_person,
+        contact_email: data.contact_email,
+        industry_type: data.industry_type,
+        company_size: data.company_size,
+        website: data.website,
+        description: data.description
       })
       .select()
       .single();
@@ -129,9 +139,9 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { 
+      {
         message: "Company created successfully",
-        company_id: company.id 
+        company_id: company.id
       },
       { status: 201 }
     );

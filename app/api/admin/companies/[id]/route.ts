@@ -112,7 +112,13 @@ export async function PUT(
         total_required_hours: data.total_required_hours,
         working_days: data.working_days,
         daily_hours_limit: data.daily_hours_limit,
-        max_weekly_hours: data.max_weekly_hours
+        max_weekly_hours: data.max_weekly_hours,
+        contact_person: data.contact_person,
+        contact_email: data.contact_email,
+        industry_type: data.industry_type,
+        company_size: data.company_size,
+        website: data.website,
+        description: data.description
       })
       .eq('id', companyId)
       .select()
