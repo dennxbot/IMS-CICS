@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
+import { createServiceRoleClient } from '@/utils/supabase/service-role';
 
 export async function PUT(
   request: NextRequest,
@@ -8,15 +9,15 @@ export async function PUT(
   try {
     const supabase = createClient();
     const reportId = params.id;
-    
+
     const body = await request.json();
     console.log('Resubmit API: Received request body:', body);
-    
+
     const { tasks_completed, problems_encountered, learnings_acquired, total_hours_worked, document_url, document_name, document_type, document_size, submission_type } = body;
 
     // Get the current user
     const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
-    
+
     if (authError || !authUser) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -57,9 +58,9 @@ export async function PUT(
 
     // Validate required fields
     if (!tasks_completed || !problems_encountered || !learnings_acquired || total_hours_worked === undefined || total_hours_worked === null) {
-      console.log('Resubmit API: Missing required fields', { 
+      console.log('Resubmit API: Missing required fields', {
         tasks_completed: !!tasks_completed,
-        problems_encountered: !!problems_encountered, 
+        problems_encountered: !!problems_encountered,
         learnings_acquired: !!learnings_acquired,
         total_hours_worked: total_hours_worked,
         total_hours_worked_type: typeof total_hours_worked
@@ -73,7 +74,7 @@ export async function PUT(
     // Validate total_hours_worked is a number and greater than 0
     const hoursWorked = Number(total_hours_worked);
     if (isNaN(hoursWorked) || hoursWorked <= 0) {
-      console.log('Resubmit API: Invalid total_hours_worked value', { 
+      console.log('Resubmit API: Invalid total_hours_worked value', {
         total_hours_worked: total_hours_worked,
         hoursWorked: hoursWorked,
         isNaN: isNaN(hoursWorked)
@@ -113,6 +114,35 @@ export async function PUT(
         { error: `Failed to resubmit report: ${updateError.message}` },
         { status: 500 }
       );
+    }
+
+    // Create notification for admins
+    try {
+      const serviceSupabase = createServiceRoleClient();
+      const { data: admins } = await serviceSupabase
+        .from('users')
+        .select('id')
+        .eq('user_type', 1);
+
+      if (admins && admins.length > 0) {
+        const { data: student } = await serviceSupabase
+          .from('users')
+          .select('full_name')
+          .eq('id', authUser.id)
+          .single();
+
+        const notifications = admins.map((admin: { id: string }) => ({
+          user_id: admin.id,
+          title: 'Report Resubmitted',
+          message: `${student?.full_name || 'A student'} resubmitted a report for week of ${report.week_starting}.`,
+          type: 'info',
+          link: `/admin/students/${authUser.id}/reports`
+        }));
+
+        await serviceSupabase.from('notifications').insert(notifications);
+      }
+    } catch (notifError) {
+      console.error('Failed to create notifications:', notifError);
     }
 
     return NextResponse.json(

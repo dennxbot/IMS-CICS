@@ -66,15 +66,19 @@ export const loginUser = async ({
 
   // Check if email is verified
   if (!data.user.email_confirmed_at) {
-    // Send OTP for verification
-    const { error: otpError } = await supabase.auth.signInWithOtp({
+    // Sign out immediately so the session doesn't persist
+    await supabase.auth.signOut();
+
+    // Send confirmation link
+    const { error: resendError } = await supabase.auth.resend({
+      type: 'signup',
       email,
       options: {
-        emailRedirectTo: undefined,
-      }
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_BASE_URL}/auth/callback`,
+      },
     });
 
-    if (otpError) {
+    if (resendError) {
       return {
         error: true,
         message: "Email not verified. Please check your email for verification instructions.",
@@ -83,7 +87,7 @@ export const loginUser = async ({
 
     return {
       error: true,
-      message: "Email not verified. A verification code has been sent to your email.",
+      message: "Email not verified. A confirmation link has been sent to your email.",
       redirectTo: `/auth/verify-email?email=${encodeURIComponent(email)}`,
     };
   }

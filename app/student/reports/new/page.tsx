@@ -7,7 +7,6 @@ import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { isReportSubmissionAllowed, SystemSettings } from "@/types/internship";
 import { Info, Calendar, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-// Re-trigger TS check
 
 // Helper function to get submission restriction message
 function getSubmissionRestrictionMessage(settings: SystemSettings) {
@@ -85,6 +84,18 @@ export default async function NewWeeklyReport() {
   // Format dates as YYYY-MM-DD
   const weekStarting = weekStart.toISOString().split('T')[0];
   const weekEnding = weekEnd.toISOString().split('T')[0];
+
+  // Check for existing report for this week
+  const { data: existingReport } = await supabase
+    .from('weekly_reports')
+    .select('id')
+    .eq('student_id', user.id)
+    .eq('week_starting', weekStarting)
+    .single();
+
+  if (existingReport) {
+    redirect('/student/reports');
+  }
 
   return (
     <div className="container mx-auto p-6 space-y-6">

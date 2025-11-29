@@ -120,13 +120,16 @@ export const registerUser = async ({
     };
   }
 
-  // Create user using admin API with email confirmation disabled
-  const { data: authData, error: authError } = await serviceSupabase.auth.admin.createUser({
+  // Create user using standard signUp to respect project settings
+  const { data: authData, error: authError } = await supabase.auth.signUp({
     email,
     password,
-    email_confirm: false, // Explicitly disable email confirmation
-    user_metadata: {
-      verification_type: 'otp',
+    options: {
+      data: {
+        full_name,
+        student_id,
+        verification_type: 'otp',
+      }
     }
   });
 
@@ -144,22 +147,10 @@ export const registerUser = async ({
     };
   }
 
-  // Send OTP using the standard method - this should send a 6-digit code
-  const { error: otpError } = await supabase.auth.signInWithOtp({
-    email,
-    options: {
-      shouldCreateUser: false, // Don't create user again
-    }
-  });
-
-  if (otpError) {
-    // Rollback user creation if OTP sending fails
-    await serviceSupabase.auth.admin.deleteUser(authData.user.id);
-    return {
-      error: true,
-      message: "Failed to send verification code. Please try again.",
-    };
-  }
+  // If the user is verified immediately (e.g. project settings have email confirmation disabled),
+  // they might be signed in. We should sign them out if we want to enforce a flow, 
+  // but usually if they are verified, it's fine. 
+  // However, since we want to enforce verification, if they are NOT verified, we proceed.
 
   // Create user profile with student data (aligning with legacy system)
   if (authData.user) {
@@ -171,7 +162,7 @@ export const registerUser = async ({
       .single();
 
     if (courseError || !courseData) {
-      // Rollback auth user if course fetch fails
+      // We can't easily rollback signUp, but we can try to delete the user via admin
       await serviceSupabase.auth.admin.deleteUser(authData.user.id);
       return {
         error: true,
@@ -179,32 +170,13 @@ export const registerUser = async ({
       };
     }
 
-    // Get company time allocation settings
-    // TODO: Implement company time settings usage
-    // let companyTimeSettings = {
-    //   total_required_hours: 500, // Default fallback
-    //   working_days: '1,2,3,4,5',
-    //   daily_hours_limit: 8.0,
-    //   max_weekly_hours: 40.0
-    // };
-
-    if (company_id) {
-      const { data: companyData, error: companyError } = await supabase
-        .from('companies')
-        .select('total_required_hours, working_days, daily_hours_limit, max_weekly_hours')
-        .eq('id', parseInt(company_id))
-        .single();
-
-      if (companyData && !companyError) {
-        // TODO: Use companyTimeSettings when implementing time allocation logic
-        // companyTimeSettings = {
-        //   total_required_hours: companyData.total_required_hours || 500,
-        //   working_days: companyData.working_days || '1,2,3,4,5',
-        //   daily_hours_limit: companyData.daily_hours_limit || 8.0,
-        //   max_weekly_hours: companyData.max_weekly_hours || 40.0
-        // };
-      }
-    }
+    // if (company_id) {
+    //   const { data: companyData, error: companyError } = await supabase
+    //     .from('companies')
+    //     .select('total_required_hours, working_days, daily_hours_limit, max_weekly_hours')
+    //     .eq('id', parseInt(company_id))
+    //     .single();
+    // }
 
     // Use service role client to bypass RLS for profile creation
     const { error: profileError } = await serviceSupabase.from('users').insert({
@@ -232,10 +204,10 @@ export const registerUser = async ({
     }
   }
 
-  // User successfully created - redirect to OTP verification
+  // User successfully created
   return {
     success: true,
-    message: "Registration successful! Verification code sent to your email.",
+    message: "Registration successful! Please check your email for the confirmation link.",
     email: email,
   };
 };

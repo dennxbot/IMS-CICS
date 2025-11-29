@@ -2,9 +2,11 @@
 
 import { createClient } from '@/utils/supabase/server';
 
+import { createServiceRoleClient } from '@/utils/supabase/service-role';
+
 export async function verifyPasswordResetOTP(email: string, code: string) {
   const supabase = createClient();
-  
+
   try {
     // Try magiclink first (most likely what Supabase is sending)
     const { data: magicData, error: magicError } = await supabase.auth.verifyOtp({
@@ -16,8 +18,8 @@ export async function verifyPasswordResetOTP(email: string, code: string) {
     if (!magicError && magicData.session) {
       // Generate a verification token that can be used for password reset
       const verificationToken = Buffer.from(`${email}:${code}:${Date.now()}`).toString('base64');
-      return { 
-        error: false, 
+      return {
+        error: false,
         message: "Code verified successfully",
         verificationToken,
         session: magicData.session
@@ -30,12 +32,12 @@ export async function verifyPasswordResetOTP(email: string, code: string) {
       token: code,
       type: 'email',
     });
-    
+
     if (!emailError && emailData.session) {
       // Generate a verification token that can be used for password reset
       const verificationToken = Buffer.from(`${email}:${code}:${Date.now()}`).toString('base64');
-      return { 
-        error: false, 
+      return {
+        error: false,
         message: "Code verified successfully",
         verificationToken,
         session: emailData.session
@@ -44,7 +46,7 @@ export async function verifyPasswordResetOTP(email: string, code: string) {
 
     // Both methods failed
     return { error: true, message: "Invalid verification code" };
-    
+
   } catch {
     return { error: true, message: "Verification failed" };
   }
@@ -52,8 +54,20 @@ export async function verifyPasswordResetOTP(email: string, code: string) {
 
 export async function resendPasswordResetOTP(email: string) {
   const supabase = createClient();
-  
+
   try {
+    // Check if user exists in the system first
+    const serviceClient = createServiceRoleClient();
+    const { data: user } = await serviceClient
+      .from("users")
+      .select("id")
+      .eq("email", email)
+      .single();
+
+    if (!user) {
+      return { error: true, message: "This email is not registered in our system." };
+    }
+
     // Generate a new OTP and send it - no redirect needed for OTP flow
     const { error } = await supabase.auth.signInWithOtp({
       email,

@@ -151,6 +151,18 @@ export default async function StudentDashboard() {
   const workingDays = companySettings.working_days.split(',').map(day => parseInt(day.trim()));
   const isWorkingDay = workingDays.includes(currentDay);
 
+  // Calculate current week start (Monday) for report checking
+  const manilaTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila' });
+  const today = new Date(manilaTime);
+  const dayOfWeek = today.getDay();
+  const weekStart = new Date(today);
+  weekStart.setDate(today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1)); // Monday
+  const currentWeekStarting = weekStart.toISOString().split('T')[0];
+
+  const hasPendingReport = recentReports.some(r => r.status === 'pending');
+  const hasReportForThisWeek = recentReports.some(r => r.week_starting === currentWeekStarting);
+  const isSubmissionDisabled = !canSubmitReport() || hasPendingReport || hasReportForThisWeek;
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
@@ -250,8 +262,8 @@ export default async function StudentDashboard() {
             <FileText className="h-4 w-4 sm:h-5 sm:w-5" />
             Recent Weekly Reports
           </CardTitle>
-          <Link href="/student/reports/new">
-            <Button size="sm" disabled={!canSubmitReport()} className="w-full sm:w-auto h-10 text-sm">Submit New Report</Button>
+          <Link href="/student/reports/new" className={isSubmissionDisabled ? "pointer-events-none" : ""}>
+            <Button size="sm" disabled={isSubmissionDisabled} className="w-full sm:w-auto h-10 text-sm">Submit New Report</Button>
           </Link>
         </CardHeader>
         <CardContent>
@@ -308,8 +320,8 @@ export default async function StudentDashboard() {
             <div className="text-center py-8">
               <FileText className="h-12 w-12 text-gray-400 mx-auto mb-3" />
               <p className="text-gray-600">No weekly reports submitted yet</p>
-              <Link href="/student/reports/new">
-                <Button className="mt-3" size="sm" disabled={!canSubmitReport()}>Submit Your First Report</Button>
+              <Link href="/student/reports/new" className={isSubmissionDisabled ? "pointer-events-none" : ""}>
+                <Button className="mt-3" size="sm" disabled={isSubmissionDisabled}>Submit Your First Report</Button>
               </Link>
             </div>
           )}

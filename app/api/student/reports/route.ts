@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { submitWeeklyReport } from "@/lib/student";
+import { createServiceRoleClient } from "@/utils/supabase/service-role";
 
 export async function POST(request: NextRequest) {
   try {
     const user = await getCurrentUser();
-    
+
     if (!user || user.user_type !== 2) {
       return NextResponse.json(
         { error: "Unauthorized" },
@@ -14,13 +15,13 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { 
-      student_id, 
-      week_starting, 
-      week_ending, 
-      tasks_completed, 
-      problems_encountered, 
-      learnings_acquired, 
+    const {
+      student_id,
+      week_starting,
+      week_ending,
+      tasks_completed,
+      problems_encountered,
+      learnings_acquired,
       next_week_plan,
       submission_type = 'form',
       document_name,
@@ -69,6 +70,30 @@ export async function POST(request: NextRequest) {
     };
 
     const result = await submitWeeklyReport(student_id, report);
+
+    // Create notification for admins
+    try {
+      const serviceSupabase = createServiceRoleClient();
+      const { data: admins } = await serviceSupabase
+        .from('users')
+        .select('id')
+        .eq('user_type', 1);
+
+      if (admins && admins.length > 0) {
+        const notifications = admins.map((admin: { id: string }) => ({
+          user_id: admin.id,
+          title: 'New Weekly Report',
+          message: `${user.full_name} submitted a report for week of ${week_starting}.`,
+          type: 'info',
+          link: `/admin/students/${user.id}/reports`
+        }));
+
+        await serviceSupabase.from('notifications').insert(notifications);
+      }
+    } catch (notifError) {
+      console.error('Failed to create notifications:', notifError);
+      // Don't fail the request if notification fails
+    }
 
     return NextResponse.json({
       success: true,

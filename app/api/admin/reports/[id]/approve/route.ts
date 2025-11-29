@@ -88,8 +88,25 @@ export async function POST(
       );
     }
 
-    return NextResponse.json({ 
-      success: true, 
+    // Create notification for student
+    try {
+      const notificationMessage = action === 'approve'
+        ? `Your weekly report for week of ${updatedReport.week_starting} has been approved.`
+        : `Your weekly report for week of ${updatedReport.week_starting} has been rejected.${comments ? ` Reason: ${comments}` : ''}`;
+
+      await supabase.from('notifications').insert({
+        user_id: updatedReport.student_id,
+        title: `Report ${action === 'approve' ? 'Approved' : 'Rejected'}`,
+        message: notificationMessage,
+        type: action === 'approve' ? 'success' : 'error',
+        link: '/student/reports'
+      });
+    } catch (notifError) {
+      console.error('Failed to create notification:', notifError);
+    }
+
+    return NextResponse.json({
+      success: true,
       report: updatedReport,
       message: `Report ${status} successfully`
     });

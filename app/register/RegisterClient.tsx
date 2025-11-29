@@ -85,7 +85,7 @@ export default function RegisterClient({ companies, courses }: RegisterClientPro
       }
 
       // Show success toast
-      toast.success("Registration successful! Please check your email for verification.");
+      toast.success("Registration successful! Please check your email for the confirmation link.");
 
       // Redirect to OTP verification page on success
       if (response.email) {

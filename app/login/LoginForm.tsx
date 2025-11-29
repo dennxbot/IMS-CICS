@@ -184,6 +184,7 @@ import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import GoogleSignin from "./GoogleSignin";
 import { PasswordInput } from "@/components/ui/password-input";
+import { toast } from "sonner";
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -198,7 +199,6 @@ interface LoginFormProps {
 }
 
 export default function LoginForm({ systemSettings }: LoginFormProps) {
-  const [serverError, setServerError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false); // Add loading state
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const router = useRouter();
@@ -223,7 +223,6 @@ export default function LoginForm({ systemSettings }: LoginFormProps) {
   });
 
   const handleSubmit = async (data: z.infer<typeof formSchema>) => {
-    setServerError(null);
     setIsLoading(true); // Set loading to true when submission starts
 
     try {
@@ -233,12 +232,17 @@ export default function LoginForm({ systemSettings }: LoginFormProps) {
       });
 
       if (response.error) {
-        setServerError(response.message);
+        toast.error(response.message);
+        if (response.redirectTo) {
+          router.push(response.redirectTo);
+        }
       } else {
         // Debug: Check what user data we received
         console.log("Login response:", response);
         console.log("User type:", response.user?.user_type);
-        
+
+        toast.success("Login successful!");
+
         // Redirect based on user type
         const userType = response.user?.user_type;
         switch (userType) {
@@ -260,7 +264,7 @@ export default function LoginForm({ systemSettings }: LoginFormProps) {
         }
       }
     } catch {
-      setServerError("An unexpected error occurred. Please try again.");
+      toast.error("An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false); // Set loading to false when submission ends
     }
@@ -330,9 +334,7 @@ export default function LoginForm({ systemSettings }: LoginFormProps) {
                   <p className="text-green-800 text-sm font-medium">{successMessage}</p>
                 </div>
               )}
-              {serverError && (
-                <p className="text-red-500 text-sm mt-2 text-center">{serverError}</p>
-              )}
+
               <Button type="submit" disabled={isLoading} className="h-11 text-base font-medium">
                 {isLoading ? (
                   <>
@@ -367,9 +369,8 @@ export default function LoginForm({ systemSettings }: LoginFormProps) {
           <div className="text-muted-foreground text-sm text-center">
             Forgot password?{" "}
             <Link
-              href={`/forgot-password${
-                email ? `?email=${encodeURIComponent(email)}` : ""
-              }`}
+              href={`/forgot-password${email ? `?email=${encodeURIComponent(email)}` : ""
+                }`}
               className="underline font-medium"
             >
               Reset my password

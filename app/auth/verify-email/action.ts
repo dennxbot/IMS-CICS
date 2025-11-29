@@ -4,7 +4,7 @@ import { createClient } from '@/utils/supabase/server';
 
 export async function verifyEmailOTP(email: string, code: string) {
   const supabase = createClient();
-  
+
   try {
     // Try magiclink first (most likely what Supabase is sending)
     const { data: magicData, error: magicError } = await supabase.auth.verifyOtp({
@@ -23,28 +23,28 @@ export async function verifyEmailOTP(email: string, code: string) {
       token: code,
       type: 'email',
     });
-    
+
     if (!emailError && emailData.session) {
       return { error: false, message: "Email verified successfully" };
     }
 
     // Both methods failed
     return { error: true, message: "Invalid verification code" };
-    
+
   } catch {
     return { error: true, message: "Verification failed" };
   }
 }
 
-export async function resendVerificationOTP(email: string) {
+export async function resendConfirmationLink(email: string) {
   const supabase = createClient();
-  
+
   try {
-    // Generate a new OTP and send it - no redirect needed for OTP flow
-    const { error } = await supabase.auth.signInWithOtp({
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
       email,
       options: {
-        emailRedirectTo: undefined, // No redirect link for OTP
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_BASE_URL}/auth/callback`,
       },
     });
 
@@ -52,8 +52,8 @@ export async function resendVerificationOTP(email: string) {
       return { error: true, message: error.message };
     }
 
-    return { error: false, message: "Verification code sent" };
+    return { error: false, message: "Confirmation link sent" };
   } catch {
-    return { error: true, message: "Failed to send verification code" };
+    return { error: true, message: "Failed to send confirmation link" };
   }
 }

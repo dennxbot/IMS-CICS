@@ -65,6 +65,8 @@ export default function AdminReportsPage() {
   const [filters, setFilters] = useState<ReportFilters>({
     companyId: 'all'
   });
+  const [missingReports, setMissingReports] = useState<Student[]>([]);
+  const [currentWeekRange, setCurrentWeekRange] = useState<{ start: string; end: string } | null>(null);
 
   // Handle filter changes
   const handleFilterChange = (key: keyof ReportFilters, value: string) => {
@@ -74,9 +76,11 @@ export default function AdminReportsPage() {
       if (value !== 'all') {
         fetchStudentsByCompany(value);
         fetchRecentReports(value);
+        fetchMissingReports(value);
       } else {
         setStudents([]);
         setRecentReports([]);
+        setMissingReports([]);
       }
     }
   };
@@ -129,6 +133,25 @@ export default function AdminReportsPage() {
       }
     } catch (error) {
       console.error('Error fetching recent reports:', error);
+    }
+  };
+
+  // Fetch missing reports
+  const fetchMissingReports = async (companyId: string) => {
+    if (!companyId || companyId === 'all') {
+      setMissingReports([]);
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/admin/reports/missing?companyId=${companyId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setMissingReports(data.missingReports || []);
+        setCurrentWeekRange({ start: data.weekStarting, end: data.weekEnding });
+      }
+    } catch (error) {
+      console.error('Error fetching missing reports:', error);
     }
   };
 
@@ -202,7 +225,7 @@ export default function AdminReportsPage() {
           </div>
 
           <Tabs defaultValue="students" value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full max-w-md grid-cols-2 mb-6">
+            <TabsList className="grid w-full max-w-md grid-cols-3 mb-6">
               <TabsTrigger value="students" className="flex items-center gap-2">
                 <Users className="h-4 w-4" />
                 Students ({students.length})
@@ -210,6 +233,10 @@ export default function AdminReportsPage() {
               <TabsTrigger value="reports" className="flex items-center gap-2">
                 <FileText className="h-4 w-4" />
                 Recent Reports
+              </TabsTrigger>
+              <TabsTrigger value="missing" className="flex items-center gap-2">
+                <Clock className="h-4 w-4" />
+                Missing Reports
               </TabsTrigger>
             </TabsList>
 
@@ -342,6 +369,72 @@ export default function AdminReportsPage() {
                       <FileText className="h-12 w-12 mx-auto mb-3 text-gray-400" />
                       <p className="text-lg font-medium text-gray-900">No reports found</p>
                       <p className="text-sm">There are no recent reports for this company.</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="missing">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-red-700">
+                    <Clock className="h-5 w-5" />
+                    Missing Reports for Current Week
+                  </CardTitle>
+                  <CardDescription>
+                    Students who have NOT submitted a weekly report for the week of{' '}
+                    {currentWeekRange ? (
+                      <span className="font-medium text-gray-900">
+                        {format(new Date(currentWeekRange.start), 'MMM d')} – {format(new Date(currentWeekRange.end), 'MMM d, yyyy')}
+                      </span>
+                    ) : '...'}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {missingReports.length > 0 ? (
+                    <div className="rounded-md border bg-red-50/30">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Student Name</TableHead>
+                            <TableHead>Student ID</TableHead>
+                            <TableHead>Course</TableHead>
+                            <TableHead className="text-right">Action</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {missingReports.map((student) => (
+                            <TableRow key={student.id} className="hover:bg-red-50">
+                              <TableCell className="font-medium">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center text-red-600 text-xs font-bold">
+                                    {student.full_name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                                  </div>
+                                  {student.full_name}
+                                </div>
+                              </TableCell>
+                              <TableCell>{student.student_id}</TableCell>
+                              <TableCell>{student.course}</TableCell>
+                              <TableCell className="text-right">
+                                <Link href={`/admin/students/${student.id}/reports`}>
+                                  <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200">
+                                    View Profile
+                                  </Button>
+                                </Link>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  ) : (
+                    <div className="text-center py-12 text-gray-500">
+                      <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <FileText className="h-6 w-6 text-green-600" />
+                      </div>
+                      <p className="text-lg font-medium text-green-700">All Caught Up!</p>
+                      <p className="text-sm text-gray-600">All students in this company have submitted their reports for this week.</p>
                     </div>
                   )}
                 </CardContent>

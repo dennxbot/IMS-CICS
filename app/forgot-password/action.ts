@@ -3,6 +3,7 @@
 import { z } from "zod";
 
 import { createClient } from "@/utils/supabase/server";
+import { createServiceRoleClient } from "@/utils/supabase/service-role";
 
 const forgotPasswordSchema = z.object({
   email: z.string().email(),
@@ -23,6 +24,21 @@ export const forgotPassword = async ({ email }: { email: string }) => {
 
   // supabase authentication from here
   const supabase = createClient();
+
+  // Check if user exists in the system first
+  const serviceClient = createServiceRoleClient();
+  const { data: user } = await serviceClient
+    .from("users")
+    .select("id")
+    .eq("email", email)
+    .single();
+
+  if (!user) {
+    return {
+      error: true,
+      message: "This email is not registered in our system.",
+    };
+  }
 
   // Try to send OTP directly - Supabase will handle the user existence check
   // This approach is more secure as it doesn't reveal whether email exists

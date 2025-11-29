@@ -77,7 +77,7 @@ export function AdminStudentReportsClient({ initialReports }: AdminStudentReport
     comments: '',
     rating: 5
   });
-  
+
   const [rejectModal, setRejectModal] = useState<{
     isOpen: boolean;
     reportId: number | null;
@@ -87,7 +87,7 @@ export function AdminStudentReportsClient({ initialReports }: AdminStudentReport
     reportId: null,
     comments: ''
   });
-  
+
   const [deleteModal, setDeleteModal] = useState<{
     isOpen: boolean;
     reportId: number | null;
@@ -139,19 +139,19 @@ export function AdminStudentReportsClient({ initialReports }: AdminStudentReport
       }
 
       const result = await response.json();
-      
+
       // Update the local state
-      setReports(prevReports => 
-        prevReports.map(report => 
-          report.id === reportId 
-            ? { 
-                ...report, 
-                status: action === 'approve' ? 'approved' : 'rejected',
-                reviewed_by: result.report.reviewed_by,
-                reviewed_at: result.report.reviewed_at,
-                supervisor_comments: result.report.supervisor_comments,
-                supervisor_rating: result.report.supervisor_rating
-              }
+      setReports(prevReports =>
+        prevReports.map(report =>
+          report.id === reportId
+            ? {
+              ...report,
+              status: action === 'approve' ? 'approved' : 'rejected',
+              reviewed_by: result.report.reviewed_by,
+              reviewed_at: result.report.reviewed_at,
+              supervisor_comments: result.report.supervisor_comments,
+              supervisor_rating: result.report.supervisor_rating
+            }
             : report
         )
       );
@@ -274,7 +274,7 @@ export function AdminStudentReportsClient({ initialReports }: AdminStudentReport
                 <Badge variant={getStatusBadgeVariant(report.status)}>
                   {report.status.charAt(0).toUpperCase() + report.status.slice(1)}
                 </Badge>
-                
+
                 {report.status === 'pending' && (
                   <div className="flex items-center gap-1 ml-2">
                     <Button
@@ -308,7 +308,7 @@ export function AdminStudentReportsClient({ initialReports }: AdminStudentReport
                     </Button>
                   </div>
                 )}
-                
+
                 {/* Delete button - available for all statuses */}
                 <Button
                   size="sm"
@@ -323,32 +323,34 @@ export function AdminStudentReportsClient({ initialReports }: AdminStudentReport
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <h4 className="font-medium text-sm text-gray-700 mb-2">Tasks Completed</h4>
-                <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-md">
-                  {report.tasks_completed}
-                </p>
+            {report.submission_type !== 'document' && (
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <h4 className="font-medium text-sm text-gray-700 mb-2">Tasks Completed</h4>
+                  <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-md">
+                    {report.tasks_completed}
+                  </p>
+                </div>
+                <div>
+                  <h4 className="font-medium text-sm text-gray-700 mb-2">Problems Encountered</h4>
+                  <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-md">
+                    {report.problems_encountered || 'None'}
+                  </p>
+                </div>
+                <div>
+                  <h4 className="font-medium text-sm text-gray-700 mb-2">Learnings Acquired</h4>
+                  <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-md">
+                    {report.learnings_acquired}
+                  </p>
+                </div>
+                <div>
+                  <h4 className="font-medium text-sm text-gray-700 mb-2">Next Week Plan</h4>
+                  <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-md">
+                    {report.next_week_plan}
+                  </p>
+                </div>
               </div>
-              <div>
-                <h4 className="font-medium text-sm text-gray-700 mb-2">Problems Encountered</h4>
-                <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-md">
-                  {report.problems_encountered || 'None'}
-                </p>
-              </div>
-              <div>
-                <h4 className="font-medium text-sm text-gray-700 mb-2">Learnings Acquired</h4>
-                <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-md">
-                  {report.learnings_acquired}
-                </p>
-              </div>
-              <div>
-                <h4 className="font-medium text-sm text-gray-700 mb-2">Next Week Plan</h4>
-                <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-md">
-                  {report.next_week_plan}
-                </p>
-              </div>
-            </div>
+            )}
 
             {report.total_hours_worked && (
               <div className="flex items-center gap-4 text-sm">
@@ -421,7 +423,7 @@ export function AdminStudentReportsClient({ initialReports }: AdminStudentReport
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
             <h3 className="text-lg font-semibold mb-4">Approve Weekly Report</h3>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -435,7 +437,7 @@ export function AdminStudentReportsClient({ initialReports }: AdminStudentReport
                   onChange={(e) => setApproveModal(prev => ({ ...prev, comments: e.target.value }))}
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Rating (1-5)
@@ -453,7 +455,7 @@ export function AdminStudentReportsClient({ initialReports }: AdminStudentReport
                 </select>
               </div>
             </div>
-            
+
             <div className="flex gap-3 mt-6">
               <Button
                 variant="outline"
@@ -487,7 +489,7 @@ export function AdminStudentReportsClient({ initialReports }: AdminStudentReport
                 <p className="text-sm text-gray-500">Provide feedback to the student</p>
               </div>
             </div>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -505,7 +507,7 @@ export function AdminStudentReportsClient({ initialReports }: AdminStudentReport
                 </p>
               </div>
             </div>
-            
+
             <div className="flex gap-3 mt-6">
               <Button
                 variant="outline"
@@ -539,7 +541,7 @@ export function AdminStudentReportsClient({ initialReports }: AdminStudentReport
                 <p className="text-sm text-gray-500">This action cannot be undone</p>
               </div>
             </div>
-            
+
             <div className="space-y-4">
               <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                 <p className="text-sm text-red-800">
@@ -549,7 +551,7 @@ export function AdminStudentReportsClient({ initialReports }: AdminStudentReport
                   This report will be permanently deleted. All associated data, including any uploaded documents, will be removed.
                 </p>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Type &quot;DELETE&quot; to confirm
@@ -563,7 +565,7 @@ export function AdminStudentReportsClient({ initialReports }: AdminStudentReport
                 />
               </div>
             </div>
-            
+
             <div className="flex gap-3 mt-6">
               <Button
                 variant="outline"

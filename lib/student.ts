@@ -142,6 +142,35 @@ export async function clockIn(studentId: string, session: 1 | 2, location?: {
   );
 
   if (!movementCheck.is_possible) {
+    // Notify admins about potential spoofing
+    try {
+      const serviceSupabase = createServiceRoleClient();
+      const { data: admins } = await serviceSupabase
+        .from('users')
+        .select('id')
+        .eq('user_type', 1);
+
+      if (admins && admins.length > 0) {
+        const { data: student } = await serviceSupabase
+          .from('users')
+          .select('full_name')
+          .eq('id', studentId)
+          .single();
+
+        const notifications = admins.map(admin => ({
+          user_id: admin.id,
+          title: 'Security Alert: Impossible Movement',
+          message: `Suspicious attendance attempt by ${student?.full_name}. Distance: ${movementCheck.distance_meters.toFixed(0)}m in ${movementCheck.time_diff_seconds}s.`,
+          type: 'error',
+          link: `/admin/students/${studentId}/attendance`
+        }));
+
+        await serviceSupabase.from('notifications').insert(notifications);
+      }
+    } catch (e) {
+      console.error('Failed to send security alert:', e);
+    }
+
     throw new Error(`🚨 Movement Validation Failed\n\nImpossible movement detected: ${movementCheck.distance_meters.toFixed(0)}m in ${movementCheck.time_diff_seconds}s would require ${movementCheck.required_speed_kmh.toFixed(1)} km/h. This suggests GPS spoofing or manipulation.`);
   }
 
@@ -243,10 +272,10 @@ export async function clockOut(studentId: string, session: 1 | 2, remarks?: stri
     throw new Error('Student is not assigned to a company');
   }
 
-  // Get company working days
+  // Get company working days and required hours
   const { data: companyData } = await supabase
     .from('companies')
-    .select('working_days')
+    .select('working_days, total_required_hours')
     .eq('id', studentData.company_id)
     .single();
 
@@ -294,8 +323,8 @@ export async function clockOut(studentId: string, session: 1 | 2, remarks?: stri
     throw e;
   }
 
-  const totalHours = (timeEnd.getTime() - timeStart.getTime()) / (1000 * 60 * 60);
-  console.log('DEBUG: clockOut - totalHours:', totalHours);
+  const sessionHours = (timeEnd.getTime() - timeStart.getTime()) / (1000 * 60 * 60);
+  console.log('DEBUG: clockOut - sessionHours:', sessionHours);
 
   // Use service role client for update to ensure we can write to the table
   // regardless of RLS policies that might be restrictive on updates
@@ -305,7 +334,7 @@ export async function clockOut(studentId: string, session: 1 | 2, remarks?: stri
   const updateData: any = {
     time_end: now,
     timer_status: 0, // Stopped
-    total_hours: Math.round(totalHours * 100) / 100, // Round to 2 decimal places
+    total_hours: Math.round(sessionHours * 100) / 100, // Round to 2 decimal places
     updated_at: new Date().toISOString(),
     is_verified: true // Auto-verify since location/time checks passed at clock-in
   };
@@ -327,6 +356,59 @@ export async function clockOut(studentId: string, session: 1 | 2, remarks?: stri
   }
 
   console.log('DEBUG: clockOut - update success:', data);
+
+  // Check for internship completion
+  try {
+    if (companyData?.total_required_hours) {
+      const { data: totalHoursData } = await serviceSupabase
+        .from('timesheets')
+        .select('total_hours')
+        .eq('student_id', studentId)
+        .eq('timer_status', 0); // Only completed sessions
+
+      const grandTotalHours = totalHoursData?.reduce((sum, sheet) => sum + (sheet.total_hours || 0), 0) || 0;
+      const currentSessionHours = Math.round(sessionHours * 100) / 100;
+      const previousTotal = grandTotalHours - currentSessionHours;
+
+      // Check if they just crossed the threshold
+      if (grandTotalHours >= companyData.total_required_hours && previousTotal < companyData.total_required_hours) {
+        // Notify Student
+        await serviceSupabase.from('notifications').insert({
+          user_id: studentId,
+          title: 'Internship Completed! 🎉',
+          message: `Congratulations! You have completed your required ${companyData.total_required_hours} hours.`,
+          type: 'success',
+          link: '/student/dashboard'
+        });
+
+        // Notify Admins
+        const { data: admins } = await serviceSupabase
+          .from('users')
+          .select('id')
+          .eq('user_type', 1);
+
+        if (admins && admins.length > 0) {
+          const { data: student } = await serviceSupabase
+            .from('users')
+            .select('full_name')
+            .eq('id', studentId)
+            .single();
+
+          const adminNotifs = admins.map(admin => ({
+            user_id: admin.id,
+            title: 'Internship Completed',
+            message: `${student?.full_name || 'A student'} has completed their internship hours (${grandTotalHours.toFixed(2)} / ${companyData.total_required_hours}).`,
+            type: 'success',
+            link: `/admin/students/${studentId}`
+          }));
+          await serviceSupabase.from('notifications').insert(adminNotifs);
+        }
+      }
+    }
+  } catch (e) {
+    console.error('Failed to check completion:', e);
+  }
+
   return data as Timesheet;
 }
 
@@ -372,6 +454,18 @@ export async function submitWeeklyReport(studentId: string, report: {
     .gte('date', report.week_starting)
     .lte('date', report.week_ending)
     .eq('timer_status', 0);
+
+  // Check if a report already exists for this week
+  const { data: existingReport } = await supabase
+    .from('weekly_reports')
+    .select('id')
+    .eq('student_id', studentId)
+    .eq('week_starting', report.week_starting)
+    .single();
+
+  if (existingReport) {
+    throw new Error('A report for this week has already been submitted.');
+  }
 
   const totalHours = timesheets?.reduce((sum, sheet) => sum + (sheet.total_hours || 0), 0) || 0;
 

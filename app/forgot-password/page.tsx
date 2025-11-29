@@ -25,6 +25,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import React, { useState, useEffect, Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { toast } from "sonner";
 import { forgotPassword } from "./action";
 
 const formSchema = z.object({
@@ -35,7 +36,6 @@ function ForgotPasswordContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const [serverError, setServerError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false); // Add loading state
   const [prefilledEmail, setPrefilledEmail] = useState('');
 
@@ -55,7 +55,7 @@ function ForgotPasswordContent() {
   });
 
   const handleSubmit = async (data: z.infer<typeof formSchema>) => {
-    setServerError(null);
+
     setIsLoading(true); // Set loading to true when submission starts
 
     try {
@@ -64,14 +64,14 @@ function ForgotPasswordContent() {
       });
 
       if (response.error) {
-        setServerError(response.message);
-        // }
+        toast.error(response.message);
       } else {
+        toast.success(response.message);
         // Redirect to OTP verification page
         router.push(`/forgot-password/verify-otp?email=${encodeURIComponent(data.email)}`);
       }
     } catch {
-      setServerError("An unexpected error occurred. Please try again.");
+      toast.error("An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false); // Set loading to false when submission ends
     }
@@ -104,9 +104,7 @@ function ForgotPasswordContent() {
                   </FormItem>
                 )}
               />
-              {serverError && (
-                <p className="text-red-500 text-sm mt-2 text-center">{serverError}</p>
-              )}
+
               <Button type="submit" disabled={isLoading} className="h-11 text-base font-medium">
                 {isLoading ? (
                   <>
