@@ -15,6 +15,7 @@ import {
   Plus,
   Clock,
   User,
+  Users,
   Mail,
   Globe
 } from 'lucide-react';
@@ -100,7 +101,6 @@ export default function CompaniesListClient({ initialCompanies }: CompaniesListC
                   </CardTitle>
                   <CardDescription className="mt-1 text-sm">
                     {company.student_count} student{company.student_count !== 1 ? 's' : ''} assigned
-                    {company.company_size && ` • ${company.company_size}`}
                   </CardDescription>
                 </div>
                 <div className="flex space-x-2">
@@ -148,6 +148,12 @@ export default function CompaniesListClient({ initialCompanies }: CompaniesListC
                       <a href={company.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline truncate">
                         Website
                       </a>
+                    </div>
+                  )}
+                  {company.company_size && (
+                    <div className="flex items-center space-x-2 text-xs sm:text-sm">
+                      <Users className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500" />
+                      <span>{company.company_size}</span>
                     </div>
                   )}
                 </div>
