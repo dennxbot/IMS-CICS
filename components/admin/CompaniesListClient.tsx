@@ -94,7 +94,7 @@ export default function CompaniesListClient({ initialCompanies }: CompaniesListC
                   <CardTitle className="text-base sm:text-lg flex items-center gap-2">
                     {company.name}
                     {company.industry_type && (
-                      <Badge variant="outline" className="text-xs font-normal">
+                      <Badge variant="secondary" className="text-xs font-normal">
                         {company.industry_type}
                       </Badge>
                     )}
