@@ -5,8 +5,8 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import CompaniesListClient from '@/components/admin/CompaniesListClient';
-import { 
-  MapIcon, 
+import {
+  MapIcon,
   Users,
   Plus,
   Building2
@@ -22,11 +22,15 @@ interface Company {
   radius: number;
   created_at: string;
   student_count: number;
+  total_required_hours?: number;
+  working_days?: string;
+  daily_hours_limit?: number;
+  max_weekly_hours?: number;
 }
 
 async function getCompanies(): Promise<Company[]> {
   const supabase = createServiceRoleClient();
-  
+
   const { data: companies, error } = await supabase
     .from('companies')
     .select(`
@@ -48,7 +52,7 @@ async function getCompanies(): Promise<Company[]> {
 
 export default async function AdminCompanies() {
   const user = await requireAuth();
-  
+
   // Check if user is admin
   if (user.user_type !== 1) {
     notFound();
@@ -83,7 +87,7 @@ export default async function AdminCompanies() {
             <div className="text-lg sm:text-2xl font-bold">{companies.length}</div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Companies with GPS</CardTitle>
@@ -95,7 +99,7 @@ export default async function AdminCompanies() {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Students</CardTitle>

@@ -6,13 +6,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import DeleteCompanyDialog from '@/components/admin/DeleteCompanyDialog';
-import { 
-  Building2, 
-  MapPin, 
-  Phone, 
-  MapIcon, 
+import {
+  Building2,
+  MapPin,
+  Phone,
+  MapIcon,
   Edit,
-  Plus
+  Plus,
+  Clock
 } from 'lucide-react';
 
 interface Company {
@@ -25,6 +26,10 @@ interface Company {
   radius: number;
   created_at: string;
   student_count: number;
+  total_required_hours?: number;
+  working_days?: string;
+  daily_hours_limit?: number;
+  max_weekly_hours?: number;
 }
 
 interface CompaniesListClientProps {
@@ -87,7 +92,7 @@ export default function CompaniesListClient({ initialCompanies }: CompaniesListC
                       <Edit className="h-4 w-4" />
                     </Button>
                   </Link>
-                  <DeleteCompanyDialog 
+                  <DeleteCompanyDialog
                     companyId={company.id}
                     companyName={company.name}
                     onDelete={handleDeleteCompany}
@@ -100,12 +105,12 @@ export default function CompaniesListClient({ initialCompanies }: CompaniesListC
                 <Phone className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500" />
                 <span>{company.contact_number}</span>
               </div>
-              
+
               <div className="flex items-start space-x-2 text-xs sm:text-sm">
                 <MapPin className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500 mt-0.5" />
                 <span className="flex-1">{company.address}</span>
               </div>
-              
+
               {company.latitude && company.longitude && (
                 <div className="flex items-center space-x-2">
                   <MapIcon className="w-3 h-3 sm:w-4 sm:h-4 text-green-600" />
@@ -119,7 +124,20 @@ export default function CompaniesListClient({ initialCompanies }: CompaniesListC
                   </div>
                 </div>
               )}
-              
+
+              <div className="pt-2 border-t mt-2">
+                <div className="flex items-center space-x-2 mb-1">
+                  <Clock className="w-3 h-3 sm:w-4 sm:h-4 text-blue-500" />
+                  <span className="text-xs sm:text-sm font-medium">Requirements</span>
+                </div>
+                <div className="grid grid-cols-2 gap-1 text-xs text-gray-600 pl-5 sm:pl-6">
+                  <div>Required: <span className="font-medium">{company.total_required_hours || 0}h</span></div>
+                  <div>Daily Limit: <span className="font-medium">{company.daily_hours_limit || 8}h</span></div>
+                  <div>Weekly Max: <span className="font-medium">{company.max_weekly_hours || 40}h</span></div>
+                  <div>Days: <span className="font-medium">{company.working_days || 'Mon-Fri'}</span></div>
+                </div>
+              </div>
+
               <div className="text-xs text-gray-500">
                 Created {new Date(company.created_at).toLocaleDateString()}
               </div>
