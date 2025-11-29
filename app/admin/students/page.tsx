@@ -16,14 +16,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { 
-  Users, 
-  UserPlus, 
-  Building2, 
-  Clock, 
-  BookOpen, 
-  CheckCircle, 
-  XCircle 
+import {
+  Users,
+  UserPlus,
+  Building2,
+  Clock,
+  BookOpen,
+  CheckCircle,
+  XCircle
 } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -50,20 +50,21 @@ interface Student {
     total_required_hours?: number;
   };
 
-  timesheets?: {
-    total_hours: number;
+  weekly_reports?: {
+    total_hours_worked: number;
+    status: string;
   }[];
 }
 
 async function getStudents(): Promise<Student[]> {
   const supabase = createClient();
-  
+
   const { data, error } = await supabase
     .from('users')
     .select(`
       *,
       companies!inner(name, total_required_hours),
-      timesheets!timesheets_student_id_fkey(total_hours)
+      weekly_reports:weekly_reports!weekly_reports_student_id_fkey(total_hours_worked, status)
     `)
     .eq('user_type', 2) // Student user type
     .order('created_at', { ascending: false });
@@ -158,7 +159,7 @@ export default async function AdminStudentsPage() {
             </p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Students</CardTitle>
@@ -171,7 +172,7 @@ export default async function AdminStudentsPage() {
             </p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Inactive Students</CardTitle>
@@ -217,7 +218,9 @@ export default async function AdminStudentsPage() {
                   </TableRow>
                 ) : (
                   students.map((student) => {
-                    const totalHours = student.timesheets?.reduce((sum, t) => sum + (t.total_hours || 0), 0) || 0;
+                    const totalHours = student.weekly_reports
+                      ?.filter(r => r.status === 'approved')
+                      .reduce((sum, r) => sum + (r.total_hours_worked || 0), 0) || 0;
                     const requiredHours = student.companies?.total_required_hours || 500;
                     const progressPercentage = getProgressPercentage(totalHours, requiredHours);
                     const companyName = student.companies?.name || "Not Assigned";
@@ -249,7 +252,7 @@ export default async function AdminStudentsPage() {
                               <span>{totalHours}h / {requiredHours}h</span>
                             </div>
                             <div className="w-full bg-gray-200 rounded-full h-2">
-                              <div 
+                              <div
                                 className={`h-2 rounded-full ${getProgressColor(progressPercentage)}`}
                                 style={{ width: `${progressPercentage}%` }}
                               />

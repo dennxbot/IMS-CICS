@@ -7,10 +7,10 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: NextRequest) {
   try {
     const supabase = createClient();
-    
+
     // Check authentication
     const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
-    
+
     if (authError || !authUser) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -55,10 +55,11 @@ export async function GET(request: NextRequest) {
         next_week_plan,
         supervisor_comments,
         supervisor_rating,
-        users!weekly_reports_student_id_fkey(
+        users!weekly_reports_student_id_fkey!inner(
           full_name,
           student_id,
-          companies!inner(name)
+          company_id,
+          companies(name)
         )
       `)
       .order('submitted_at', { ascending: false })

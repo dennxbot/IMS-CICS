@@ -88,14 +88,14 @@ export default function EditWeeklyReport() {
     try {
       setIsLoading(true);
       const user = await getCurrentUserClient();
-      
+
       if (!user || user.user_type !== 2) {
         router.push('/login');
         return;
       }
 
       const response = await fetch(`/api/student/reports/${reportId}/edit`);
-      
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
         throw new Error(errorData.error || 'Failed to load report');
@@ -109,7 +109,7 @@ export default function EditWeeklyReport() {
         learnings: data.learnings || '',
         total_hours_worked: data.total_hours_worked || 0,
       });
-      
+
       // Set submission type based on existing data
       if (data.document_url && data.document_name) {
         setSubmissionType(data.submission_type || 'document');
@@ -144,7 +144,7 @@ export default function EditWeeklyReport() {
       'application/pdf', // .pdf
       'text/plain' // .txt
     ];
-    
+
     if (!allowedTypes.includes(file.type)) {
       alert('Please upload a Word document (.doc, .docx), PDF, or text file.');
       return;
@@ -192,7 +192,7 @@ export default function EditWeeklyReport() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.activities_completed.trim() || !formData.learnings.trim()) {
       alert('Please fill in all required fields');
       return;
@@ -205,7 +205,7 @@ export default function EditWeeklyReport() {
 
     try {
       setIsSaving(true);
-      
+
       // Prepare the update data
       const updateData: {
         activities_completed: string;
@@ -244,7 +244,7 @@ export default function EditWeeklyReport() {
         updateData.document_type = null;
         updateData.document_size = null;
       }
-      
+
       const response = await fetch(`/api/student/reports/${reportId}/edit`, {
         method: 'PUT',
         headers: {
@@ -333,14 +333,14 @@ export default function EditWeeklyReport() {
               <h3 className="text-lg font-semibold mb-2">
                 This report has been {report.status === 'approved' ? 'approved' : 'rejected'}
               </h3>
-              
+
               {report.status === 'rejected' ? (
                 <div className="space-y-4">
                   <p className="text-gray-600">
                     Your report was rejected. You can make corrections and resubmit it for review.
                   </p>
                   <div className="flex justify-center gap-3">
-                    <Button 
+                    <Button
                       onClick={() => router.push(`/student/reports/${reportId}/resubmit`)}
                       variant="default"
                     >
@@ -354,7 +354,7 @@ export default function EditWeeklyReport() {
                   This report has been approved and cannot be edited.
                 </p>
               )}
-              
+
               {report.supervisor_comments && (
                 <div className="bg-gray-50 rounded-lg p-4 mt-6 text-left">
                   <h4 className="font-medium text-gray-900 mb-2">Supervisor Comments:</h4>
@@ -390,11 +390,10 @@ export default function EditWeeklyReport() {
               <Calendar className="h-4 w-4 inline mr-1" />
               Week of {new Date(report.week_starting).toLocaleDateString()} - {new Date(report.week_ending).toLocaleDateString()}
             </p>
-            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-              report.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
-              report.status === 'approved' ? 'bg-green-100 text-green-800' : 
-              'bg-red-100 text-red-800'
-            }`}>
+            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${report.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                report.status === 'approved' ? 'bg-green-100 text-green-800' :
+                  'bg-red-100 text-red-800'
+              }`}>
               {report.status === 'pending' ? (
                 <AlertCircle className="h-3 w-3 mr-1" />
               ) : report.status === 'approved' ? (
@@ -481,7 +480,7 @@ export default function EditWeeklyReport() {
               {(submissionType === 'document' || submissionType === 'both') && (
                 <div className="space-y-3">
                   <Label>Document Upload</Label>
-                  
+
                   {/* Existing Document Preview */}
                   {existingDocument && (
                     <div className="p-3 bg-gray-50 rounded-lg border">
@@ -545,7 +544,7 @@ export default function EditWeeklyReport() {
                       <Upload className="h-4 w-4 mr-2" />
                       {uploadedFile ? 'Change File' : 'Upload Document'}
                     </Button>
-                    
+
                     {uploadedFile && (
                       <div className="flex items-center gap-2 text-sm text-gray-600">
                         <File className="h-4 w-4" />
@@ -588,11 +587,9 @@ export default function EditWeeklyReport() {
                 id="total_hours_worked"
                 type="number"
                 value={formData.total_hours_worked}
-                onChange={(e) => setFormData({ ...formData, total_hours_worked: parseInt(e.target.value) || 0 })}
-                min="1"
-                max="168"
-                required
-                className="mt-1"
+                readOnly
+                disabled
+                className="mt-1 bg-gray-100"
               />
             </div>
 
@@ -642,8 +639,8 @@ export default function EditWeeklyReport() {
                   className="w-full h-[70vh] border-0"
                   title={existingDocument.name}
                 />
-              ) : existingDocument.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || 
-                 existingDocument.type === 'application/msword' ? (
+              ) : existingDocument.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+                existingDocument.type === 'application/msword' ? (
                 <iframe
                   src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(existingDocument.url)}`}
                   className="w-full h-[70vh] border-0"
@@ -692,7 +689,7 @@ export default function EditWeeklyReport() {
           </div>
         </div>
       )}
-      
+
       <Toaster />
     </div>
   );

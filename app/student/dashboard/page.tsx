@@ -10,7 +10,7 @@ import { ClockButton } from "@/components/student/ClockButton";
 import { DashboardHeader } from "@/components/student/DashboardHeader";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { createClient } from "@/utils/supabase/server";
-import { formatPhilippineDateDisplay } from "@/lib/timeUtils";
+import { formatPhilippineDateDisplay, getPhilippineDayOfWeek } from "@/lib/timeUtils";
 import { SystemSettings, isReportSubmissionAllowed } from "@/types/internship";
 
 // Helper function to get system settings from database
@@ -146,6 +146,11 @@ export default async function StudentDashboard() {
     return message;
   };
 
+  // Calculate if today is a working day
+  const currentDay = getPhilippineDayOfWeek();
+  const workingDays = companySettings.working_days.split(',').map(day => parseInt(day.trim()));
+  const isWorkingDay = workingDays.includes(currentDay);
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
@@ -213,7 +218,6 @@ export default async function StudentDashboard() {
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <ClockButton
-              studentId={user.id}
               session={1}
               isActive={morningActive}
               hasRecord={!!hasMorningSession}
@@ -222,9 +226,9 @@ export default async function StudentDashboard() {
               totalHours={hasMorningSession?.total_hours}
               sessionStartTime={systemSettings?.morning_checkin_time || '07:45'}
               sessionEndTime={systemSettings?.morning_checkout_time || '11:45'}
+              isWorkingDay={isWorkingDay}
             />
             <ClockButton
-              studentId={user.id}
               session={2}
               isActive={afternoonActive}
               hasRecord={!!hasAfternoonSession}
@@ -233,6 +237,7 @@ export default async function StudentDashboard() {
               totalHours={hasAfternoonSession?.total_hours}
               sessionStartTime={systemSettings?.afternoon_checkin_time || '12:45'}
               sessionEndTime={systemSettings?.afternoon_checkout_time || '16:45'}
+              isWorkingDay={isWorkingDay}
             />
           </div>
         </CardContent>

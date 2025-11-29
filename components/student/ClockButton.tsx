@@ -42,7 +42,6 @@ function formatSessionTime(timeStr: string): string {
 }
 
 interface ClockButtonProps {
-  studentId: string;
   session: 1 | 2;
   isActive: boolean;
   hasRecord: boolean;
@@ -51,6 +50,7 @@ interface ClockButtonProps {
   totalHours?: number;
   sessionStartTime: string;
   sessionEndTime: string;
+  isWorkingDay: boolean;
 }
 
 export function ClockButton({
@@ -61,7 +61,8 @@ export function ClockButton({
   timeEnd,
   totalHours,
   sessionStartTime,
-  sessionEndTime
+  sessionEndTime,
+  isWorkingDay
 }: ClockButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -274,6 +275,20 @@ export function ClockButton({
                 // If session is already completed (hasRecord is true but not active), don't show any button
                 if (hasRecord) {
                   return null;
+                }
+
+                // Check if it's a working day
+                if (!isWorkingDay) {
+                  return (
+                    <Button
+                      disabled
+                      variant="secondary"
+                      size="sm"
+                      className="w-full sm:w-auto h-10 text-sm opacity-50 cursor-not-allowed"
+                    >
+                      Non-working Day
+                    </Button>
+                  );
                 }
 
                 // Check if it's too early for this session

@@ -28,7 +28,7 @@ interface Student {
 
 async function getStudent(id: string): Promise<Student | null> {
   const supabase = createClient();
-  
+
   const { data: student, error } = await supabase
     .from('users')
     .select(`
@@ -48,34 +48,34 @@ async function getStudent(id: string): Promise<Student | null> {
 
 async function getProgressHours(studentId: string): Promise<number> {
   const supabase = createClient();
-  
-  const { data: timesheets, error } = await supabase
-    .from('timesheets')
-    .select('total_hours')
-    .eq('student_id', studentId)
-    .not('total_hours', 'is', null);
 
-  if (error || !timesheets) {
+  const { data: reports, error } = await supabase
+    .from('weekly_reports')
+    .select('total_hours_worked')
+    .eq('student_id', studentId)
+    .eq('status', 'approved');
+
+  if (error || !reports) {
     return 0;
   }
 
-  const totalHours = timesheets.reduce((sum, timesheet) => {
-    return sum + (parseFloat(timesheet.total_hours?.toString() || '0'));
+  const totalHours = reports.reduce((sum, report) => {
+    return sum + (report.total_hours_worked || 0);
   }, 0);
 
   return totalHours;
 }
 
-export default async function StudentDetailPage({ 
-  params 
-}: { 
-  params: { id: string } 
+export default async function StudentDetailPage({
+  params
+}: {
+  params: { id: string }
 }) {
   await requireAuth();
-  
+
   const student = await getStudent(params.id);
   const progressHours = await getProgressHours(params.id);
-  
+
   if (!student) {
     notFound();
   }
@@ -135,25 +135,25 @@ export default async function StudentDetailPage({
                 <span className="font-medium">Student ID:</span>
                 <span>{student.student_id}</span>
               </div>
-              
+
               <div className="flex items-center gap-2 text-sm">
                 <Mail className="h-4 w-4 text-muted-foreground" />
                 <span className="font-medium">Email:</span>
                 <span>{student.email}</span>
               </div>
-              
+
               <div className="flex items-center gap-2 text-sm">
                 <Phone className="h-4 w-4 text-muted-foreground" />
                 <span className="font-medium">Contact:</span>
                 <span>{student.contact_number}</span>
               </div>
-              
+
               <div className="flex items-center gap-2 text-sm">
                 <MapPin className="h-4 w-4 text-muted-foreground" />
                 <span className="font-medium">Address:</span>
                 <span>{student.address}</span>
               </div>
-              
+
               <div className="flex items-center gap-2 text-sm">
                 <BookOpen className="h-4 w-4 text-muted-foreground" />
                 <span className="font-medium">Course:</span>
@@ -177,7 +177,7 @@ export default async function StudentDetailPage({
               <span className="font-medium">Company:</span>
               <span>{student.companies?.name || "Not Assigned"}</span>
             </div>
-            
+
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">
@@ -186,26 +186,26 @@ export default async function StudentDetailPage({
                 </div>
                 <span className="font-semibold">{progressHours.toFixed(1)} / {requiredHours} hours</span>
               </div>
-              
+
               {/* Progress Bar */}
               <div className="w-full bg-gray-200 rounded-full h-2">
-                <div 
+                <div
                   className={`h-2 rounded-full transition-all duration-300 ${progressColor}`}
                   style={{ width: `${progressPercentage}%` }}
                 ></div>
               </div>
-              
+
               <div className="text-right text-xs text-muted-foreground">
                 {progressPercentage.toFixed(1)}% Complete
               </div>
             </div>
-            
+
             <div className="flex items-center gap-2 text-sm">
               <Clock className="h-4 w-4 text-muted-foreground" />
               <span className="font-medium">Required Hours:</span>
               <span>{student.companies?.total_required_hours || 500} hours</span>
             </div>
-            
+
             <div className="flex items-center gap-2 text-sm">
               <Calendar className="h-4 w-4 text-muted-foreground" />
               <span className="font-medium">Registered:</span>

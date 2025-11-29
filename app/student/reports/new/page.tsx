@@ -1,62 +1,63 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
-import { WeeklyReportFormWithFileUpload } from "@/components/student/WeeklyReportFormWithFileUpload";
+import { WeeklyReportForm } from "@/components/student/WeeklyReportForm";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { createServiceRoleClient } from "@/utils/supabase/service-role";
 import { isReportSubmissionAllowed, SystemSettings } from "@/types/internship";
 import { Info, Calendar, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+// Re-trigger TS check
 
 // Helper function to get submission restriction message
 function getSubmissionRestrictionMessage(settings: SystemSettings) {
   if (!settings || !settings.restrict_report_submission) {
     return null;
   }
-  
+
   const allowedDays = settings.report_submission_days.split(',').map(day => parseInt(day.trim()));
   const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   const allowedDayNames = allowedDays.map(day => dayNames[day]).join(', ');
-  
+
   // Get current date/time in Manila timezone
   const manilaTime = new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila' });
   const currentDate = new Date(manilaTime);
   const currentDayName = dayNames[currentDate.getDay()];
-  const currentTime = currentDate.toLocaleTimeString('en-US', { 
-    hour: '2-digit', 
+  const currentTime = currentDate.toLocaleTimeString('en-US', {
+    hour: '2-digit',
     minute: '2-digit',
-    hour12: true 
+    hour12: true
   });
-  
+
   // Find next available submission date
   let nextSubmissionDate = null;
   let daysToAdd = 1;
-  
+
   while (!nextSubmissionDate && daysToAdd <= 14) { // Look ahead up to 2 weeks
     const futureDate = new Date(currentDate);
     futureDate.setDate(currentDate.getDate() + daysToAdd);
     const futureDay = futureDate.getDay();
-    
+
     if (allowedDays.includes(futureDay)) {
       nextSubmissionDate = futureDate;
     }
     daysToAdd++;
   }
-  
+
   let message = `Report submission is restricted to: ${allowedDayNames}`;
   message += `\n\nCurrent date and time: ${currentDayName}, ${currentDate.toLocaleDateString()} ${currentTime}`;
-  
+
   if (nextSubmissionDate) {
     const nextDayName = dayNames[nextSubmissionDate.getDay()];
     message += `\n\nNext submission available: ${nextDayName}, ${nextSubmissionDate.toLocaleDateString()}`;
   }
-  
+
   return message;
 }
 
 export default async function NewWeeklyReport() {
   const user = await getCurrentUser();
-  
+
   if (!user || user.user_type !== 2) {
     redirect('/login');
   }
@@ -77,7 +78,7 @@ export default async function NewWeeklyReport() {
   const dayOfWeek = today.getDay();
   const weekStart = new Date(today);
   weekStart.setDate(today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1)); // Monday
-  
+
   const weekEnd = new Date(weekStart);
   weekEnd.setDate(weekStart.getDate() + 6); // Sunday
 
@@ -123,7 +124,7 @@ export default async function NewWeeklyReport() {
       )}
 
       {isSubmissionAllowed && (
-        <WeeklyReportFormWithFileUpload 
+        <WeeklyReportForm
           studentId={user.id}
           weekStarting={weekStarting}
           weekEnding={weekEnding}

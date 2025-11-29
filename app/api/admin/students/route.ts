@@ -14,12 +14,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = createClient();
+
     const data = await request.json();
 
     // Validate required fields
     const requiredFields = [
-      'student_id', 'full_name', 'email', 'contact_number', 
+      'student_id', 'full_name', 'email', 'contact_number',
       'address', 'course_id', 'company_id', 'password'
     ];
 
@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
 
     if (profileError) {
       // Rollback auth user if profile creation fails
-      await supabase.auth.admin.deleteUser(authData.user.id);
+      await serviceSupabase.auth.admin.deleteUser(authData.user.id);
       return NextResponse.json(
         { error: profileError.message },
         { status: 400 }
@@ -127,9 +127,9 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { 
+      {
         message: "Student created successfully",
-        student_id: authData.user.id 
+        student_id: authData.user.id
       },
       { status: 201 }
     );
@@ -146,10 +146,10 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const supabase = createClient();
-    
+
     // Check authentication
     const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
-    
+
     if (authError || !authUser) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
