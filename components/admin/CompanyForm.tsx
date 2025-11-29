@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { MapIcon, Save, X } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface CompanyFormProps {
   company?: {
@@ -35,7 +36,7 @@ interface CompanyFormProps {
 export default function CompanyForm({ company }: CompanyFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+
   const [formData, setFormData] = useState({
     name: company?.name || '',
     contact: company?.contact_number || '',
@@ -63,7 +64,6 @@ export default function CompanyForm({ company }: CompanyFormProps) {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
-    setError(null);
 
     try {
       // Validate required fields
@@ -161,12 +161,14 @@ export default function CompanyForm({ company }: CompanyFormProps) {
         throw new Error(result.error || 'Failed to save company');
       }
 
+      toast.success(company ? 'Company updated successfully' : 'Company created successfully');
+
       // Success - redirect to companies list
       router.push('/admin/companies');
       router.refresh();
 
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      toast.error(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setIsLoading(false);
     }
@@ -174,7 +176,7 @@ export default function CompanyForm({ company }: CompanyFormProps) {
 
   const getCurrentLocation = () => {
     if (!navigator.geolocation) {
-      setError('Geolocation is not supported by this browser');
+      toast.error('Geolocation is not supported by this browser');
       return;
     }
 
@@ -185,21 +187,16 @@ export default function CompanyForm({ company }: CompanyFormProps) {
           latitude: position.coords.latitude.toFixed(6),
           longitude: position.coords.longitude.toFixed(6)
         }));
+        toast.success('Location retrieved successfully');
       },
       (error) => {
-        setError('Unable to retrieve your location: ' + error.message);
+        toast.error('Unable to retrieve your location: ' + error.message);
       }
     );
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-3 sm:px-4 py-2 sm:py-3 rounded-lg text-sm sm:text-base">
-          {error}
-        </div>
-      )}
-
       <Card>
         <CardHeader>
           <CardTitle className="text-lg sm:text-xl">Company Information</CardTitle>

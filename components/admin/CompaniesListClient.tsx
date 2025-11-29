@@ -19,6 +19,7 @@ import {
   Mail,
   Globe
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface Company {
   id: number;
@@ -60,14 +61,15 @@ export default function CompaniesListClient({ initialCompanies }: CompaniesListC
 
       if (response.ok) {
         setCompanies(companies.filter(company => company.id !== companyId));
+        toast.success('Company deleted successfully');
       } else {
         const error = await response.json();
         console.error('Error deleting company:', error);
-        alert('Failed to delete company. Please try again.');
+        toast.error('Failed to delete company. Please try again.');
       }
     } catch (error) {
       console.error('Error deleting company:', error);
-      alert('An error occurred while deleting the company.');
+      toast.error('An error occurred while deleting the company.');
     }
   };
 
