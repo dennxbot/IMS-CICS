@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
       .from('timesheets')
       .select(`
         *,
-        users!timesheets_student_id_fkey(
+        users!timesheets_student_id_fkey!inner(
           full_name,
           student_id,
           course,

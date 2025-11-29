@@ -4,11 +4,10 @@ import { createServiceRoleClient } from '@/utils/supabase/service-role';
 // GET: Get students by company with their attendance summary
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const resolvedParams = await params;
-    const companyId = resolvedParams.id;
+    const companyId = params.id;
 
     console.log('API called with company ID:', companyId);
 
@@ -64,20 +63,29 @@ export async function GET(
 
     // If we got students, try to get their attendance counts separately
     if (students && students.length > 0) {
+      console.log(`Fetched ${students.length} students from DB:`, students.map(s => s.id));
+
+      // Deduplicate students by ID just in case
+      const uniqueStudents = Array.from(new Map(students.map(item => [item.id, item])).values());
+
+      if (uniqueStudents.length !== students.length) {
+        console.warn(`Found duplicates! Original: ${students.length}, Unique: ${uniqueStudents.length}`);
+      }
+
       const studentsWithCounts = await Promise.all(
-        students.map(async (student) => {
+        uniqueStudents.map(async (student) => {
           const { count } = await serviceSupabase
             .from('timesheets')
             .select('*', { count: 'exact', head: true })
             .eq('student_id', student.id);
-          
+
           return {
             ...student,
             timesheets: [{ count: count || 0 }]
           };
         })
       );
-      
+
       return NextResponse.json({ students: studentsWithCounts });
     }
 
