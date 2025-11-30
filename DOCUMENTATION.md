@@ -59,6 +59,7 @@ The **Internship Management System (IMS-CICS)** is a comprehensive web-based pla
 1. Navigate to the IMS-CICS URL (provided by your institution)
 2. Click **"Get Started"** or **"Access Dashboard"** on the landing page
 3. Choose to **Register** (first-time users) or **Login** (existing users)
+   - **Note:** You can login using either your registered Email Address or Student ID.
 
 ### Registration Process
 
@@ -784,7 +785,7 @@ Deployment
 **Problem:** Cannot login / "Invalid credentials" error
 
 **Solutions:**
-1. Verify email and password are correct
+1. Verify email or Student ID and password are correct
 2. Check if account is verified (check email for confirmation link)
 3. Try password reset if forgotten
 4. Clear browser cache and cookies

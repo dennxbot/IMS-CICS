@@ -5,20 +5,22 @@ import { z } from "zod";
 import { createClient } from "@/utils/supabase/server";
 // import { redirect } from "next/navigation";
 
+import { createServiceRoleClient } from "@/utils/supabase/service-role";
+
 const loginSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(5), // Adjust the minimum length as needed
+  email: z.string().min(1, "Email or Student ID is required"),
+  password: z.string().min(1, "Password is required"),
 });
 
 export const loginUser = async ({
-  email,
+  email: identifier,
   password,
 }: {
   email: string;
   password: string;
 }) => {
   const loginUserValidation = loginSchema.safeParse({
-    email,
+    email: identifier,
     password,
   });
 
@@ -30,23 +32,34 @@ export const loginUser = async ({
     };
   }
 
+  let emailToUse = identifier;
+
+  // Check if identifier is NOT an email
+  const isEmail = z.string().email().safeParse(identifier).success;
+
+  if (!isEmail) {
+    // Assume it's a Student ID
+    const serviceSupabase = createServiceRoleClient();
+    const { data: user, error } = await serviceSupabase
+      .from('users')
+      .select('email')
+      .eq('student_id', identifier)
+      .single();
+
+    if (error || !user) {
+      return {
+        error: true,
+        message: "Invalid login credentials",
+      };
+    }
+    emailToUse = user.email;
+  }
+
   // supabase authentication from here
   const supabase = createClient();
 
-  ///////////////////////////// TEST for redirection ///////////
-  // const { data, error } = await supabase.auth.getUser();
-  // const {
-  //   data: { user },
-  // } = await supabase.auth.getUser();
-
-  // if (user) {
-  //   return redirect("/dashboard");
-  // }
-
-  ///////////////////////////////////////////
-
   const { data, error } = await supabase.auth.signInWithPassword({
-    email,
+    email: emailToUse,
     password,
   });
 
@@ -72,7 +85,7 @@ export const loginUser = async ({
     // Send confirmation link
     const { error: resendError } = await supabase.auth.resend({
       type: 'signup',
-      email,
+      email: emailToUse,
       options: {
         emailRedirectTo: `${process.env.NEXT_PUBLIC_BASE_URL}/auth/callback`,
       },
@@ -88,7 +101,7 @@ export const loginUser = async ({
     return {
       error: true,
       message: "Email not verified. A confirmation link has been sent to your email.",
-      redirectTo: `/auth/verify-email?email=${encodeURIComponent(email)}`,
+      redirectTo: `/auth/verify-email?email=${encodeURIComponent(emailToUse)}`,
     };
   }
 

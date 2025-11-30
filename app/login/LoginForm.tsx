@@ -187,7 +187,7 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { toast } from "sonner";
 
 const formSchema = z.object({
-  email: z.string().email(),
+  email: z.string().min(1, "Email or Student ID is required"),
   password: passwordSchema,
 });
 
@@ -308,9 +308,9 @@ export default function LoginForm({ systemSettings }: LoginFormProps) {
                 name="email"
                 render={({ field }) => (
                   <FormItem className="space-y-2">
-                    <FormLabel className="text-sm sm:text-base">Email</FormLabel>
+                    <FormLabel className="text-sm sm:text-base">Email or Student ID</FormLabel>
                     <FormControl>
-                      <Input {...field} className="h-11 text-base" placeholder="Enter your email" />
+                      <Input {...field} className="h-11 text-base" placeholder="Enter your email or student ID" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
