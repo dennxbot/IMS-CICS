@@ -228,8 +228,9 @@ export default async function LandingPage() {
               </Link>
             </div>
 
-            {/* Right Section - Made with love (hidden on mobile) */}
-            <div className="hidden md:flex items-center gap-2 text-xs text-white/50">
+
+            {/* Right Section - Made with love */}
+            <div className="flex items-center gap-2 text-[10px] md:text-xs text-white/50">
               <span>Made with</span>
               <span className="text-red-400 animate-pulse">❤️</span>
               <span>by CSU Interns</span>
