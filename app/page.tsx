@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/dialog"
 
 import { createClient } from "@/utils/supabase/server";
+import { LandingFooter } from "@/components/landing-footer";
 
 export default async function LandingPage() {
   const supabase = createClient();
@@ -80,10 +81,10 @@ export default async function LandingPage() {
                         VISION
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="dark bg-background border-border text-foreground sm:max-w-[425px]">
+                    <DialogContent className="dark bg-background border-border text-foreground w-[90vw] max-w-[425px] p-4 sm:p-6">
                       <DialogHeader>
-                        <DialogTitle className="text-blue-400 text-xl mb-4">VISION</DialogTitle>
-                        <DialogDescription className="text-muted-foreground text-base leading-relaxed">
+                        <DialogTitle className="text-blue-400 text-lg sm:text-xl mb-2 sm:mb-4">VISION</DialogTitle>
+                        <DialogDescription className="text-muted-foreground text-sm sm:text-base leading-relaxed">
                           CSU is a University with global stature in the arts, culture, agriculture and fisheries, the sciences as well as technological and professional fields.
                         </DialogDescription>
                       </DialogHeader>
@@ -97,10 +98,10 @@ export default async function LandingPage() {
                         MISSION
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="dark bg-background border-border text-foreground sm:max-w-[425px]">
+                    <DialogContent className="dark bg-background border-border text-foreground w-[90vw] max-w-[425px] p-4 sm:p-6">
                       <DialogHeader>
-                        <DialogTitle className="text-emerald-400 text-xl mb-4">MISSION</DialogTitle>
-                        <DialogDescription className="text-muted-foreground text-base leading-relaxed">
+                        <DialogTitle className="text-emerald-400 text-lg sm:text-xl mb-2 sm:mb-4">MISSION</DialogTitle>
+                        <DialogDescription className="text-muted-foreground text-sm sm:text-base leading-relaxed">
                           Cagayan State University shall produce globally competent graduates through excellent instruction, innovative and creative research, responsive public service and productive industry and community engagement.
                         </DialogDescription>
                       </DialogHeader>
@@ -114,11 +115,11 @@ export default async function LandingPage() {
                         About
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="dark bg-background border-border text-foreground sm:max-w-[425px]">
+                    <DialogContent className="dark bg-background border-border text-foreground w-[90vw] max-w-[425px] p-4 sm:p-6">
                       <DialogHeader>
-                        <DialogTitle className="text-purple-400 text-xl mb-4">About</DialogTitle>
+                        <DialogTitle className="text-purple-400 text-lg sm:text-xl mb-2 sm:mb-4">About</DialogTitle>
                         <DialogDescription asChild>
-                          <div className="text-muted-foreground text-base space-y-4 text-center">
+                          <div className="text-muted-foreground text-sm sm:text-base space-y-3 sm:space-y-4 text-center">
                             <div>
                               <p className="font-semibold text-foreground mb-2">Developed by our interns:</p>
                               <div className="space-y-1">
@@ -146,7 +147,7 @@ export default async function LandingPage() {
 
       <main className="flex-1 flex flex-col">
         {/* Hero Section */}
-        <section className="relative flex-1 flex items-end justify-start min-h-screen overflow-hidden pb-24 md:pb-32">
+        <section className="relative flex-1 flex items-end justify-start min-h-screen overflow-hidden pb-40 md:pb-32">
           {/* Background Image */}
           <div className="absolute inset-0 -z-20">
             {heroImage ? (
@@ -191,53 +192,7 @@ export default async function LandingPage() {
         </section>
       </main>
 
-      <footer className="absolute bottom-0 w-full border-t border-white/20 bg-gradient-to-r from-black/60 via-black/50 to-black/60 backdrop-blur-md z-10">
-        <div className="container py-3 md:py-4 px-4 md:px-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-3 md:gap-4">
-            {/* Left Section - Copyright */}
-            <div className="flex flex-col items-center md:items-start gap-1">
-              <p className="text-xs md:text-sm text-white/80 font-medium text-center md:text-left">
-                © 2025 {systemName}
-              </p>
-              <p className="text-[10px] md:text-xs text-white/50 text-center md:text-left">
-                All rights reserved.
-              </p>
-            </div>
-
-            {/* Center Section - Links */}
-            <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4">
-              <Link
-                href="#"
-                className="text-[10px] md:text-xs text-white/60 hover:text-white transition-all duration-300 hover:underline underline-offset-4"
-              >
-                Privacy Policy
-              </Link>
-              <span className="text-white/30 hidden md:inline">•</span>
-              <Link
-                href="#"
-                className="text-[10px] md:text-xs text-white/60 hover:text-white transition-all duration-300 hover:underline underline-offset-4"
-              >
-                Terms of Service
-              </Link>
-              <span className="text-white/30 hidden md:inline">•</span>
-              <Link
-                href="#"
-                className="text-[10px] md:text-xs text-white/60 hover:text-white transition-all duration-300 hover:underline underline-offset-4"
-              >
-                Contact Us
-              </Link>
-            </div>
-
-
-            {/* Right Section - Made with love */}
-            <div className="flex items-center gap-2 text-[10px] md:text-xs text-white/50">
-              <span>Made with</span>
-              <span className="text-red-400 animate-pulse">❤️</span>
-              <span>by CSU Interns</span>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <LandingFooter systemName={systemName} />
     </div>
   )
 }
