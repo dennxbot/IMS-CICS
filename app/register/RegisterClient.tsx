@@ -30,7 +30,9 @@ import { toast } from "sonner";
 import { PasswordInput } from "@/components/ui/password-input";
 
 const formSchema = z.object({
-  student_id: z.string().min(3, "Student ID must be at least 3 characters"),
+  student_id: z.string()
+    .min(3, "Student ID must be at least 3 characters")
+    .regex(/^\d{2}-\d{5,6}$/, "Student ID must be in format xx-xxxxx or xx-xxxxxx"),
   full_name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
   contact: z.string().min(6, "Contact number must be at least 6 digits"),
@@ -125,7 +127,28 @@ export default function RegisterClient({ companies, courses }: RegisterClientPro
                   <FormItem className="space-y-1 sm:space-y-2">
                     <FormLabel className="text-sm sm:text-base font-medium">Student ID</FormLabel>
                     <FormControl>
-                      <Input {...field} className="h-11 text-base" placeholder="Enter your student ID" />
+                      <Input
+                        {...field}
+                        className="h-11 text-base"
+                        placeholder="xx-xxxxxx"
+                        maxLength={9}
+                        onChange={(e) => {
+                          // Remove all non-digit characters
+                          let value = e.target.value.replace(/\D/g, '');
+
+                          // Truncate to max 8 digits (2+6)
+                          if (value.length > 8) {
+                            value = value.slice(0, 8);
+                          }
+
+                          // Add dash after 2nd digit if we have more than 2 digits
+                          if (value.length > 2) {
+                            value = `${value.slice(0, 2)}-${value.slice(2)}`;
+                          }
+
+                          field.onChange(value);
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

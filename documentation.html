@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IMS-CICS Documentation - Cagayan State University</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --secondary: #10b981;
+            --accent: #8b5cf6;
+            --dark: #1e293b;
+            --dark-light: #334155;
+            --gray: #64748b;
+            --light: #f1f5f9;
+            --white: #ffffff;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .subtitle {
+            color: var(--gray);
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+
+        .header .meta {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+
+        /* Navigation */
+        .nav {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 2rem;
+            position: sticky;
+            top: 1rem;
+            z-index: 100;
+        }
+
+        .nav h3 {
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+
+        .nav-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.5rem;
+        }
+
+        .nav-link {
+            padding: 0.75rem 1rem;
+            background: var(--light);
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--dark);
+            transition: all 0.3s ease;
+            display: block;
+        }
+
+        .nav-link:hover {
+            background: var(--primary);
+            color: var(--white);
+            transform: translateX(5px);
+        }
+
+        /* Content Card */
+        .content-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            margin-bottom: 2rem;
+        }
+
+        .section {
+            margin-bottom: 3rem;
+        }
+
+        .section h2 {
+            font-size: 2rem;
+            color: var(--dark);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid var(--primary);
+            display: inline-block;
+        }
+
+        .section h3 {
+            font-size: 1.5rem;
+            color: var(--dark-light);
+            margin: 2rem 0 1rem;
+        }
+
+        .section h4 {
+            font-size: 1.2rem;
+            color: var(--primary);
+            margin: 1.5rem 0 0.75rem;
+        }
+
+        /* Feature Cards */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, var(--light) 0%, var(--white) 100%);
+            padding: 1.5rem;
+            border-radius: 15px;
+            border-left: 4px solid var(--primary);
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+        }
+
+        .feature-card h4 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-card ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .feature-card li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .feature-card li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--success);
+            font-weight: bold;
+        }
+
+        /* Steps */
+        .steps {
+            counter-reset: step;
+        }
+
+        .step {
+            counter-increment: step;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            background: var(--light);
+            border-radius: 12px;
+            position: relative;
+            padding-left: 4rem;
+        }
+
+        .step:before {
+            content: counter(step);
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--primary);
+            color: var(--white);
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        /* Info Boxes */
+        .info-box {
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin: 1.5rem 0;
+            border-left: 4px solid;
+        }
+
+        .info-box.note {
+            background: #dbeafe;
+            border-color: var(--primary);
+        }
+
+        .info-box.warning {
+            background: #fef3c7;
+            border-color: var(--warning);
+        }
+
+        .info-box.success {
+            background: #d1fae5;
+            border-color: var(--success);
+        }
+
+        .info-box.danger {
+            background: #fee2e2;
+            border-color: var(--danger);
+        }
+
+        .info-box strong {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: var(--white);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        th {
+            background: var(--primary);
+            color: var(--white);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--light);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background: var(--light);
+        }
+
+        /* Code Blocks */
+        code {
+            background: var(--dark);
+            color: #10b981;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        pre {
+            background: var(--dark);
+            color: var(--light);
+            padding: 1.5rem;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+
+        /* Lists */
+        ul,
+        ol {
+            margin: 1rem 0;
+            padding-left: 2rem;
+        }
+
+        li {
+            margin: 0.5rem 0;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin: 0.25rem;
+        }
+
+        .badge.student {
+            background: #dbeafe;
+            color: var(--primary);
+        }
+
+        .badge.admin {
+            background: #fce7f3;
+            color: #db2777;
+        }
+
+        .badge.pending {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .badge.approved {
+            background: #d1fae5;
+            color: #059669;
+        }
+
+        .badge.rejected {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        /* Footer */
+        .footer {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            margin-top: 3rem;
+        }
+
+        .footer p {
+            color: var(--gray);
+            margin: 0.5rem 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .section h2 {
+                font-size: 1.5rem;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-links {
+                grid-template-columns: 1fr;
+            }
+
+            .step {
+                padding-left: 3rem;
+            }
+
+            .step:before {
+                width: 2rem;
+                height: 2rem;
+                font-size: 1rem;
+            }
+        }
+
+        /* Smooth Scroll */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Print Styles */
+        @media print {
+            body {
+                background: white;
+            }
+
+            .nav {
+                display: none;
+            }
+
+            .content-card {
+                box-shadow: none;
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🎓 IMS-CICS Documentation</h1>
+            <p class="subtitle">Cagayan State University - Internship Management System</p>
+            <div class="meta">
+                <span>📅 Version 1.0</span>
+                <span>🔄 Last Updated: November 30, 2025</span>
+                <span>👨‍💻 Maintained by: Mark Angelo Doctolero</span>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="nav">
+            <h3>📑 Quick Navigation</h3>
+            <div class="nav-links">
+                <a href="#overview" class="nav-link">System Overview</a>
+                <a href="#getting-started" class="nav-link">Getting Started</a>
+                <a href="#student-features" class="nav-link">Student Features</a>
+                <a href="#admin-features" class="nav-link">Admin Features</a>
+                <a href="#guides" class="nav-link">User Guides</a>
+                <a href="#technical" class="nav-link">Technical Info</a>
+                <a href="#troubleshooting" class="nav-link">Troubleshooting</a>
+                <a href="#support" class="nav-link">Support</a>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="content-card">
+            <!-- System Overview -->
+            <section id="overview" class="section">
+                <h2>📊 System Overview</h2>
+                <p>The <strong>Internship Management System (IMS-CICS)</strong> is a comprehensive web-based platform
+                    designed to streamline the entire internship process for students, academic coordinators, and host
+                    companies at Cagayan State University.</p>
+
+                <h3>🎯 Key Objectives</h3>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>Centralized Management</h4>
+                        <p>Single platform for all internship-related activities</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Real-time Tracking</h4>
+                        <p>Monitor internship hours and progress in real-time</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Automated Reporting</h4>
+                        <p>Generate and submit reports digitally</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Compliance Monitoring</h4>
+                        <p>Ensure students meet internship requirements</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Communication Hub</h4>
+                        <p>Facilitate coordination between all stakeholders</p>
+                    </div>
+                </div>
+
+                <h3>💻 Technology Stack</h3>
+                <table>
+                    <tr>
+                        <th>Component</th>
+                        <th>Technology</th>
+                    </tr>
+                    <tr>
+                        <td>Frontend</td>
+                        <td>Next.js 14, React, TypeScript, Tailwind CSS</td>
+                    </tr>
+                    <tr>
+                        <td>Backend</td>
+                        <td>Next.js API Routes, Server Actions</td>
+                    </tr>
+                    <tr>
+                        <td>Database</td>
+                        <td>Supabase (PostgreSQL)</td>
+                    </tr>
+                    <tr>
+                        <td>Authentication</td>
+                        <td>Supabase Auth</td>
+                    </tr>
+                    <tr>
+                        <td>UI Components</td>
+                        <td>shadcn/ui</td>
+                    </tr>
+                    <tr>
+                        <td>Deployment</td>
+                        <td>Vercel</td>
+                    </tr>
+                </table>
+            </section>
+
+            <!-- Getting Started -->
+            <section id="getting-started" class="section">
+                <h2>🚀 Getting Started</h2>
+
+                <h3>System Requirements</h3>
+                <ul>
+                    <li>Modern web browser (Chrome, Firefox, Safari, Edge)</li>
+                    <li>Stable internet connection</li>
+                    <li>Valid email address (for registration)</li>
+                </ul>
+
+                <h3>Registration Process</h3>
+
+                <h4>For Students:</h4>
+                <div class="steps">
+                    <div class="step">
+                        Click <strong>"Get Started"</strong> or <strong>"Register"</strong> on the landing page
+                    </div>
+                    <div class="step">
+                        Fill in the registration form with your details (Student ID, Full Name, Email, Contact Number,
+                        Address, Course, Company, Password)
+                    </div>
+                    <div class="step">
+                        Click <strong>"Create Account"</strong>
+                    </div>
+                    <div class="step">
+                        Check your email for a confirmation link
+                    </div>
+                    <div class="step">
+                        Click the confirmation link to verify your account
+                    </div>
+                    <div class="step">
+                        Login with your credentials
+                    </div>
+                </div>
+
+                <div class="info-box note">
+                    <strong>📝 Note for Administrators:</strong>
+                    Admin accounts are created by system administrators. Contact the IT department for account creation.
+                </div>
+            </section>
+
+            <!-- Student Features -->
+            <section id="student-features" class="section">
+                <h2>👨‍🎓 Student Features</h2>
+                <span class="badge student">Student Portal</span>
+
+                <h3>1. Dashboard</h3>
+                <p><strong>Access:</strong> <code>/student/dashboard</code></p>
+
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>Overview Cards</h4>
+                        <ul>
+                            <li>Total hours logged</li>
+                            <li>Pending reports</li>
+                            <li>Approved reports</li>
+                            <li>Completion percentage</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Quick Actions</h4>
+                        <ul>
+                            <li>Clock In/Out</li>
+                            <li>Submit New Report</li>
+                            <li>View Profile</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Activity Feed</h4>
+                        <ul>
+                            <li>Recent reports</li>
+                            <li>Attendance records</li>
+                            <li>Notifications</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>2. Attendance Tracking</h3>
+                <p><strong>Access:</strong> <code>/student/attendance</code></p>
+
+                <h4>How to Clock In:</h4>
+                <div class="steps">
+                    <div class="step">Navigate to <strong>Attendance</strong> page</div>
+                    <div class="step">Click <strong>"Clock In"</strong> button</div>
+                    <div class="step">Confirm your location (if prompted)</div>
+                    <div class="step">Your start time is recorded</div>
+                </div>
+
+                <h4>How to Clock Out:</h4>
+                <div class="steps">
+                    <div class="step">Return to <strong>Attendance</strong> page</div>
+                    <div class="step">Click <strong>"Clock Out"</strong> button</div>
+                    <div class="step">System automatically calculates hours worked</div>
+                    <div class="step">Hours are added to your total</div>
+                </div>
+
+                <div class="info-box warning">
+                    <strong>⚠️ Important:</strong>
+                    Always clock out at the end of your shift. Ensure accurate location data for verification. Report
+                    any discrepancies immediately.
+                </div>
+
+                <h3>3. Report Management</h3>
+                <p><strong>Access:</strong> <code>/student/reports</code></p>
+
+                <h4>Creating a New Report:</h4>
+                <div class="steps">
+                    <div class="step">Go to <strong>Reports</strong> → <strong>"New Report"</strong></div>
+                    <div class="step">Select report period (start and end dates)</div>
+                    <div class="step">Enter title and detailed description of activities</div>
+                    <div class="step">Describe learnings and challenges</div>
+                    <div class="step">Upload supporting documents (optional)</div>
+                    <div class="step">Click <strong>"Submit Report"</strong></div>
+                </div>
+
+                <h4>Report Status:</h4>
+                <table>
+                    <tr>
+                        <th>Status</th>
+                        <th>Description</th>
+                        <th>Action</th>
+                    </tr>
+                    <tr>
+                        <td><span class="badge pending">Pending</span></td>
+                        <td>Awaiting coordinator review</td>
+                        <td>Wait for feedback</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge approved">Approved</span></td>
+                        <td>Accepted by coordinator</td>
+                        <td>No action needed</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge rejected">Rejected</span></td>
+                        <td>Needs revision</td>
+                        <td>Revise and resubmit</td>
+                    </tr>
+                </table>
+
+                <h3>4. Profile Management</h3>
+                <p><strong>Access:</strong> <code>/student/profile</code></p>
+
+                <div class="feature-card">
+                    <h4>Profile Sections</h4>
+                    <ul>
+                        <li>Personal Information (Name, ID, Email, Contact)</li>
+                        <li>Academic Details (Course)</li>
+                        <li>Internship Information (Company, Dates, Hours)</li>
+                        <li>Account Settings (Password, Notifications)</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Admin Features -->
+            <section id="admin-features" class="section">
+                <h2>👨‍💼 Admin/Coordinator Features</h2>
+                <span class="badge admin">Admin Portal</span>
+
+                <h3>1. Admin Dashboard</h3>
+                <p><strong>Access:</strong> <code>/admin/dashboard</code></p>
+
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>System Overview</h4>
+                        <ul>
+                            <li>Total students enrolled</li>
+                            <li>Active internships</li>
+                            <li>Pending reports</li>
+                            <li>Compliance statistics</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Analytics</h4>
+                        <ul>
+                            <li>Completion rates</li>
+                            <li>Average hours logged</li>
+                            <li>Trends and insights</li>
+                            <li>Performance metrics</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>2. Student Management</h3>
+                <p><strong>Access:</strong> <code>/admin/students</code></p>
+
+                <h4>Adding a New Student:</h4>
+                <div class="steps">
+                    <div class="step">Click <strong>"Add Student"</strong></div>
+                    <div class="step">Fill in student information (Name, ID, Email, Course)</div>
+                    <div class="step">Enter internship details (Company, Dates, Required Hours)</div>
+                    <div class="step">Click <strong>"Create Student"</strong></div>
+                </div>
+
+                <h3>3. Company Management</h3>
+                <p><strong>Access:</strong> <code>/admin/companies</code></p>
+
+                <div class="info-box note">
+                    <strong>📍 Location Required:</strong>
+                    Latitude and Longitude are required fields when adding or editing companies. Use Google Maps to find
+                    accurate coordinates.
+                </div>
+
+                <h3>4. Report Review & Approval</h3>
+                <p><strong>Access:</strong> <code>/admin/reports</code></p>
+
+                <h4>Reviewing Reports:</h4>
+                <div class="steps">
+                    <div class="step">Navigate to <strong>Reports</strong> page</div>
+                    <div class="step">Click on a pending report</div>
+                    <div class="step">Read content and review attachments</div>
+                    <div class="step">Check for completeness and accuracy</div>
+                    <div class="step">Approve or reject with feedback</div>
+                </div>
+
+                <div class="info-box success">
+                    <strong>✅ Best Practice:</strong>
+                    Always provide constructive feedback when rejecting reports. Be specific about what needs
+                    improvement.
+                </div>
+
+                <h3>5. Attendance Monitoring</h3>
+                <p><strong>Access:</strong> <code>/admin/attendance</code></p>
+
+                <div class="feature-card">
+                    <h4>Monitoring Features</h4>
+                    <ul>
+                        <li>View all attendance records</li>
+                        <li>Real-time clock-in/out status</li>
+                        <li>Filter by student, company, or date</li>
+                        <li>Export attendance reports</li>
+                        <li>Identify irregular patterns</li>
+                    </ul>
+                </div>
+
+                <h3>6. System Settings</h3>
+                <p><strong>Access:</strong> <code>/admin/settings</code></p>
+
+                <table>
+                    <tr>
+                        <th>Setting Category</th>
+                        <th>Options</th>
+                    </tr>
+                    <tr>
+                        <td>General</td>
+                        <td>System name, Logo, Hero image, Contact info</td>
+                    </tr>
+                    <tr>
+                        <td>Notifications</td>
+                        <td>Email templates, Triggers, Schedules</td>
+                    </tr>
+                    <tr>
+                        <td>Internship</td>
+                        <td>Required hours, Deadlines, Policies</td>
+                    </tr>
+                    <tr>
+                        <td>User Management</td>
+                        <td>Admin accounts, Permissions, Roles</td>
+                    </tr>
+                </table>
+            </section>
+
+            <!-- User Guides -->
+            <section id="guides" class="section">
+                <h2>📖 User Guides</h2>
+
+                <h3>For Students: Getting the Most Out of Your Internship</h3>
+
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>Be Proactive</h4>
+                        <ul>
+                            <li>Clock in/out accurately every day</li>
+                            <li>Submit reports on time</li>
+                            <li>Respond to feedback promptly</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Document Everything</h4>
+                        <ul>
+                            <li>Keep detailed notes</li>
+                            <li>Take photos of your work</li>
+                            <li>Save important documents</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Communicate</h4>
+                        <ul>
+                            <li>Report issues immediately</li>
+                            <li>Ask questions when unclear</li>
+                            <li>Keep coordinator informed</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Stay Organized</h4>
+                        <ul>
+                            <li>Check dashboard daily</li>
+                            <li>Review notifications</li>
+                            <li>Plan ahead for deadlines</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>Common Tasks Quick Reference</h3>
+                <table>
+                    <tr>
+                        <th>Task</th>
+                        <th>Steps</th>
+                        <th>Frequency</th>
+                    </tr>
+                    <tr>
+                        <td>Clock In</td>
+                        <td>Attendance → Clock In</td>
+                        <td>Daily (start of shift)</td>
+                    </tr>
+                    <tr>
+                        <td>Clock Out</td>
+                        <td>Attendance → Clock Out</td>
+                        <td>Daily (end of shift)</td>
+                    </tr>
+                    <tr>
+                        <td>Submit Report</td>
+                        <td>Reports → New Report</td>
+                        <td>Weekly/Monthly</td>
+                    </tr>
+                    <tr>
+                        <td>Check Progress</td>
+                        <td>Dashboard → View Stats</td>
+                        <td>As needed</td>
+                    </tr>
+                    <tr>
+                        <td>Update Profile</td>
+                        <td>Profile → Edit</td>
+                        <td>When info changes</td>
+                    </tr>
+                </table>
+
+                <h3>For Administrators: Best Practices</h3>
+
+                <div class="info-box success">
+                    <strong>✅ Daily Tasks:</strong>
+                    Check dashboard for alerts • Review new registrations • Approve/reject pending reports • Monitor
+                    attendance issues
+                </div>
+
+                <div class="info-box note">
+                    <strong>📅 Weekly Tasks:</strong>
+                    Generate progress reports • Contact students with low hours • Update company information • Review
+                    analytics
+                </div>
+
+                <div class="info-box warning">
+                    <strong>📊 Monthly Tasks:</strong>
+                    Generate compliance reports • Evaluate program effectiveness • Plan improvements • Update system
+                    settings
+                </div>
+            </section>
+
+            <!-- Technical Information -->
+            <section id="technical" class="section">
+                <h2>⚙️ Technical Information</h2>
+
+                <h3>System Architecture</h3>
+                <pre><code>Frontend (Next.js)
+├── App Router
+├── Server Components
+├── Client Components
+└── API Routes
+
+Backend (Supabase)
+├── PostgreSQL Database
+├── Authentication
+├── Storage
+└── Real-time Subscriptions
+
+Deployment
+└── Vercel (Recommended)</code></pre>
+
+                <h3>Security Features</h3>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>Authentication</h4>
+                        <p>Supabase Auth with email verification</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Authorization</h4>
+                        <p>Role-based access control (RBAC)</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Data Protection</h4>
+                        <p>Encryption in transit and at rest</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>Security</h4>
+                        <p>SQL injection prevention, XSS protection</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Troubleshooting -->
+            <section id="troubleshooting" class="section">
+                <h2>🔧 Troubleshooting</h2>
+
+                <h3>Common Issues & Solutions</h3>
+
+                <div class="info-box danger">
+                    <strong>🔒 Login Issues</strong>
+                    <ul>
+                        <li>Verify email and password are correct</li>
+                        <li>Check if account is verified (check email)</li>
+                        <li>Try password reset if forgotten</li>
+                        <li>Clear browser cache and cookies</li>
+                        <li>Try a different browser</li>
+                    </ul>
+                </div>
+
+                <div class="info-box warning">
+                    <strong>⏰ Clock In/Out Issues</strong>
+                    <ul>
+                        <li>Check internet connection</li>
+                        <li>Enable location services (if required)</li>
+                        <li>Refresh the page</li>
+                        <li>Clear browser cache</li>
+                        <li>Try a different browser</li>
+                    </ul>
+                </div>
+
+                <div class="info-box note">
+                    <strong>📄 Report Submission Issues</strong>
+                    <ul>
+                        <li>Check file size (max 10MB per file)</li>
+                        <li>Verify file format is supported</li>
+                        <li>Ensure all required fields are filled</li>
+                        <li>Check internet connection</li>
+                        <li>Try uploading files one at a time</li>
+                    </ul>
+                </div>
+
+                <h3>Browser Compatibility</h3>
+                <table>
+                    <tr>
+                        <th>Browser</th>
+                        <th>Status</th>
+                    </tr>
+                    <tr>
+                        <td>Google Chrome (latest)</td>
+                        <td><span class="badge approved">✅ Recommended</span></td>
+                    </tr>
+                    <tr>
+                        <td>Mozilla Firefox (latest)</td>
+                        <td><span class="badge approved">✅ Recommended</span></td>
+                    </tr>
+                    <tr>
+                        <td>Microsoft Edge (latest)</td>
+                        <td><span class="badge approved">✅ Recommended</span></td>
+                    </tr>
+                    <tr>
+                        <td>Safari (latest)</td>
+                        <td><span class="badge approved">✅ Recommended</span></td>
+                    </tr>
+                    <tr>
+                        <td>Internet Explorer</td>
+                        <td><span class="badge rejected">❌ Not Supported</span></td>
+                    </tr>
+                </table>
+            </section>
+
+            <!-- Support -->
+            <section id="support" class="section">
+                <h2>💬 Support</h2>
+
+                <h3>Getting Help</h3>
+
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>For Students</h4>
+                        <ul>
+                            <li>Check this documentation first</li>
+                            <li>Contact your coordinator</li>
+                            <li>Submit a support ticket</li>
+                            <li>Visit the help center</li>
+                        </ul>
+                    </div>
+                    <div class="feature-card">
+                        <h4>For Administrators</h4>
+                        <ul>
+                            <li>Email: cics@csu.edu.ph</li>
+                            <li>System Administrator: Mark Angelo Doctolero</li>
+                            <li>Technical Support Team</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>Reporting Bugs</h3>
+                <div class="info-box note">
+                    <strong>When reporting a bug, please include:</strong>
+                    <ol>
+                        <li>What you were trying to do</li>
+                        <li>What happened instead</li>
+                        <li>Steps to reproduce the issue</li>
+                        <li>Browser and device information</li>
+                        <li>Screenshots (if applicable)</li>
+                    </ol>
+                </div>
+            </section>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <h3>👥 Developed by CSU Interns</h3>
+            <p>Jhomilyn P. Guerrero • Krizel Jane V. Sabio • Maricar C. Tabalno • Jenifer C. Uddipa</p>
+            <p><strong>Maintained by:</strong> Mark Angelo Doctolero</p>
+            <p style="margin-top: 1.5rem; color: var(--dark);">© 2025 Cagayan State University - Internship Management
+                System</p>
+            <p>All rights reserved.</p>
+        </div>
+    </div>
+
+    <script>
+        // Smooth scroll for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add active state to navigation
+        const sections = document.querySelectorAll('.section');
+        const navLinks = document.querySelectorAll('.nav-link');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (pageYOffset >= sectionTop - 200) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.style.background = '';
+                link.style.color = '';
+                if (link.getAttribute('href').slice(1) === current) {
+                    link.style.background = 'var(--primary)';
+                    link.style.color = 'var(--white)';
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
