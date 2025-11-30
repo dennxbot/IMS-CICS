@@ -168,12 +168,14 @@ export default async function LandingPage() {
 
           <div className="container flex flex-col items-start text-left px-4 md:px-8 relative z-10 max-w-7xl mx-auto">
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-white drop-shadow-sm animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200 leading-[1.1] max-w-4xl">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">Internship Programs</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">Smart Internships.</span>
+              <br className="hidden sm:block" />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-blue-400">Smarter Future.</span>
             </h1>
 
             <p className="mt-6 md:mt-8 max-w-xl md:max-w-2xl text-sm sm:text-base md:text-lg text-white/80 leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300 drop-shadow-md">
-              Streamline the entire internship process for students, coordinators, and companies.
-              Track hours, manage reports, and ensure compliance in one unified platform.
+              Leverage real-time tracking and intelligent reporting to elevate your internship program.
+              The digital bridge connecting talent with opportunity.
             </p>
 
             <div className="mt-8 md:mt-12 flex flex-col w-full sm:w-auto sm:flex-row gap-4 items-center animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-500">
