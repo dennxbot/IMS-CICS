@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -46,9 +47,10 @@ export default function CoursesListClient({ initialCourses }: CoursesListClientP
 
       // Remove the deleted course from the state
       setCourses(prevCourses => prevCourses.filter(course => course.id !== courseId));
+      toast.success('Course deleted successfully');
     } catch (error) {
       console.error('Error deleting course:', error);
-      alert('Failed to delete course. Please try again.');
+      toast.error(error instanceof Error ? error.message : 'Failed to delete course');
     }
   };
 
@@ -87,11 +89,10 @@ export default function CoursesListClient({ initialCourses }: CoursesListClientP
               </TableCell>
               <TableCell>
                 <span
-                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    course.is_active
-                      ? "bg-green-100 text-green-800"
-                      : "bg-red-100 text-red-800"
-                  }`}
+                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${course.is_active
+                    ? "bg-green-100 text-green-800"
+                    : "bg-red-100 text-red-800"
+                    }`}
                 >
                   {course.is_active ? "Active" : "Inactive"}
                 </span>

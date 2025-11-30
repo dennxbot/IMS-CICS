@@ -91,7 +91,7 @@ export default function CompaniesListClient({ initialCompanies }: CompaniesListC
       } else {
         const error = await response.json();
         console.error('Error deleting company:', error);
-        toast.error('Failed to delete company. Please try again.');
+        toast.error(error.error || 'Failed to delete company. Please try again.');
       }
     } catch (error) {
       console.error('Error deleting company:', error);
