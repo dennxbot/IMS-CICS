@@ -159,7 +159,9 @@ export async function PUT(request: NextRequest) {
     if (morning_duration !== undefined) updatePayload.morning_duration = morning_duration;
     if (afternoon_checkin_time !== undefined) updatePayload.afternoon_checkin_time = afternoon_checkin_time;
     if (afternoon_checkout_time !== undefined) updatePayload.afternoon_checkout_time = afternoon_checkout_time;
+    if (afternoon_checkout_time !== undefined) updatePayload.afternoon_checkout_time = afternoon_checkout_time;
     if (afternoon_duration !== undefined) updatePayload.afternoon_duration = afternoon_duration;
+    if (body.hero_image_url !== undefined) updatePayload.hero_image_url = body.hero_image_url;
 
     // Update the system settings (there should only be one record)
     const { data: settings, error } = await supabase

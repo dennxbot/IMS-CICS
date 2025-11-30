@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -84,7 +85,6 @@ function hexToHsl(hex: string): HSL {
   };
 }
 
-
 const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
 // Helper function to calculate duration between two times (HH:MM format)
@@ -112,10 +112,12 @@ function calculateDuration(startTime: string, endTime: string): number {
 export default function AdminSettings() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   // Form state
   const [systemName, setSystemName] = useState('');
   const [logoUrl, setLogoUrl] = useState('');
+  const [heroImageUrl, setHeroImageUrl] = useState('');
   const [primaryColor, setPrimaryColor] = useState('#3B82F6');
   const [secondaryColor, setSecondaryColor] = useState('#10B981');
   const [minWeeklyHours, setMinWeeklyHours] = useState(40);
@@ -151,14 +153,18 @@ export default function AdminSettings() {
 
       setSystemName(systemSettings.name || '');
       setLogoUrl(systemSettings.logo_url || '');
+      setHeroImageUrl(systemSettings.hero_image_url || '');
       setPrimaryColor(systemSettings.primary_color || '#3B82F6');
       setSecondaryColor(systemSettings.secondary_color || '#10B981');
       setMinWeeklyHours(systemSettings.min_weekly_hours || 40);
       setMaxDailyHours(systemSettings.max_daily_hours || 8);
-      setEmailNotifications(systemSettings.email_notifications || true);
-      setAttendanceVerificationRequired(systemSettings.attendance_verification_required || true);
+      setEmailNotifications(systemSettings.email_notifications ?? true);
+      setAttendanceVerificationRequired(systemSettings.attendance_verification_required ?? true);
       setRestrictReportSubmission(systemSettings.restrict_report_submission || false);
-      setReportSubmissionDays(systemSettings.report_submission_days ? systemSettings.report_submission_days.split(',') : ['6']);
+
+      if (systemSettings.report_submission_days) {
+        setReportSubmissionDays(systemSettings.report_submission_days.split(','));
+      }
 
       // Load session time settings
       setMorningCheckinTime(systemSettings.morning_checkin_time || '07:45');
@@ -175,6 +181,49 @@ export default function AdminSettings() {
     }
   };
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (!validTypes.includes(file.type)) {
+      toast.error('Please upload a valid image file (JPEG, PNG, WebP, GIF)');
+      return;
+    }
+
+    // Validate file size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image size must be less than 5MB');
+      return;
+    }
+
+    try {
+      setIsUploading(true);
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/admin/upload-image', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to upload image');
+      }
+
+      const data = await response.json();
+      setHeroImageUrl(data.url);
+      toast.success('Image uploaded successfully!');
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to upload image');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const handleSaveSettings = async () => {
     try {
       setIsSaving(true);
@@ -182,6 +231,7 @@ export default function AdminSettings() {
       const payload = {
         name: systemName,
         logo_url: logoUrl,
+        hero_image_url: heroImageUrl,
         primary_color: primaryColor,
         secondary_color: secondaryColor,
         min_weekly_hours: minWeeklyHours,
@@ -290,6 +340,48 @@ export default function AdminSettings() {
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="heroImageUrl">Hero Image URL</Label>
+              <Input
+                id="heroImageUrl"
+                value={heroImageUrl}
+                onChange={(e) => setHeroImageUrl(e.target.value)}
+                placeholder="Enter hero image URL"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="heroImageUpload">Upload Hero Image</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="heroImageUpload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  disabled={isUploading}
+                />
+                {isUploading && <span className="flex items-center text-sm text-gray-500">Uploading...</span>}
+              </div>
+              {heroImageUrl && (
+                <div className="mt-2">
+                  <p className="text-sm text-gray-500 mb-1">Preview:</p>
+                  <Image
+                    src={heroImageUrl}
+                    alt="Hero Preview"
+                    width={0}
+                    height={0}
+                    sizes="100vw"
+                    style={{ width: 'auto', height: '160px' }}
+                    className="object-cover rounded-md border"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="primaryColor">Primary Color</Label>
               <Input
                 id="primaryColor"
@@ -369,7 +461,7 @@ export default function AdminSettings() {
               </div>
             )}
           </CardContent>
-        </Card>
+        </Card >
 
         <Card>
           <CardHeader>
@@ -451,7 +543,7 @@ export default function AdminSettings() {
                     min="0"
                     max="8"
                     value={morningDuration}
-                    readOnly
+                    readOnly={true}
                     className="bg-gray-50"
                   />
                 </div>
@@ -502,7 +594,7 @@ export default function AdminSettings() {
                     min="0"
                     max="8"
                     value={afternoonDuration}
-                    readOnly
+                    readOnly={true}
                     className="bg-gray-50"
                   />
                 </div>
@@ -510,44 +602,20 @@ export default function AdminSettings() {
             </div>
 
             <div className="text-sm text-gray-500 bg-blue-50 p-3 rounded-lg">
-              <p className="font-medium">Session Configuration:</p>
-              <p>These settings define the official clock-in and clock-out times for student attendance. Students can only check in/out during the configured session times.</p>
+              <p>
+                <strong>Note:</strong> Duration is automatically calculated based on check-in and check-out times.
+                If the duration spans across midnight, it will be calculated correctly.
+              </p>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Notification Settings</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="emailNotifications"
-                checked={emailNotifications}
-                onCheckedChange={(checked) => setEmailNotifications(checked as boolean)}
-              />
-              <Label htmlFor="emailNotifications">Enable Email Notifications</Label>
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="attendanceVerification"
-                checked={attendanceVerificationRequired}
-                onCheckedChange={(checked) => setAttendanceVerificationRequired(checked as boolean)}
-              />
-              <Label htmlFor="attendanceVerification">Require Attendance Verification</Label>
-            </div>
-          </CardContent>
-        </Card>
-
-        <div className="flex justify-end space-x-4">
-          <Button variant="outline" onClick={loadSettings}>Reset</Button>
-          <Button onClick={handleSaveSettings} disabled={isSaving || (restrictReportSubmission && reportSubmissionDays.length === 0)}>
+        <div className="flex justify-end">
+          <Button onClick={handleSaveSettings} disabled={isSaving}>
             {isSaving ? 'Saving...' : 'Save Settings'}
           </Button>
         </div>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 }

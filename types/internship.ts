@@ -102,6 +102,7 @@ export interface SystemSettings {
   id: number;
   name: string;
   logo_url?: string;
+  hero_image_url?: string;
   primary_color: string;
   secondary_color: string;
   email_notifications: boolean;
@@ -157,7 +158,7 @@ export const isReportSubmissionAllowed = (settings: SystemSettings): boolean => 
   if (!settings.restrict_report_submission) {
     return true; // No restriction, allow submission any day
   }
-  
+
   const currentDay = getCurrentISODay();
   const allowedDays = parseWorkingDays(settings.report_submission_days);
   return allowedDays.includes(currentDay);
